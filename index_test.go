@@ -27,6 +27,10 @@ func Test_UserIndex_AddUser(t *testing.T) {
 			if reflect.ValueOf(index[tt.url]).IsNil() {
 				t.Errorf("Failed to add user %v index.\n", tt.url)
 			}
+			data := index[tt.url]
+			if data.Nick != tt.nick {
+				t.Errorf("Incorrect user data added to index for user %v.\n", tt.url)
+			}
 		})
 	}
 }
@@ -70,6 +74,10 @@ func Test_UserIndex_GetUserStatuses(t *testing.T) {
 			statuses := index.GetUserStatuses(tt.url)
 			if reflect.ValueOf(statuses).IsNil() {
 				t.Errorf("Failed to pull statuses for user %v\n", tt.url)
+			}
+			data := index[tt.url]
+			if !reflect.DeepEqual(data.Status, statuses) {
+				t.Errorf("Incorrect data retrieved as statuses for user %v.\n", tt.url)
 			}
 		})
 	}
