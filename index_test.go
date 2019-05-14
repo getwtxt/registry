@@ -51,3 +51,36 @@ func Test_UserIndex_DelUser(t *testing.T) {
 		})
 	}
 }
+
+func Test_UserIndex_GetUserStatuses(t *testing.T) {
+	index := initTestEnv()
+	var getUserStatusCases = []struct {
+		url string
+	}{
+		{
+			url: "https://example.com/twtxt.txt",
+		},
+		{
+			url: "https://example3.com/twtxt.txt",
+		},
+	}
+	for _, tt := range getUserStatusCases {
+		t.Run(tt.url, func(t *testing.T) {
+			statuses := index.GetUserStatuses(tt.url)
+			if reflect.ValueOf(statuses).IsNil() {
+				t.Errorf("Failed to pull statuses for user %v\n", tt.url)
+			}
+		})
+	}
+
+}
+
+func Test_UserIndex_GetStatuses(t *testing.T) {
+	index := initTestEnv()
+	t.Run("UserIndex.GetStatuses()", func(t *testing.T) {
+		statuses := index.GetStatuses()
+		if reflect.ValueOf(statuses).IsNil() {
+			t.Errorf("Failed to pull all statuses.")
+		}
+	})
+}
