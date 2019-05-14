@@ -44,8 +44,8 @@ var imutex = sync.RWMutex{}
 type TimeSlice []time.Time
 
 // NewUserIndex returns a new instance of a user index
-func NewUserIndex() *UserIndex {
-	return &UserIndex{}
+func NewUserIndex() UserIndex {
+	return map[string]*Data{}
 }
 
 // NewTimeMap returns an initialized TimeMap.
