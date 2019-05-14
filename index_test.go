@@ -10,10 +10,11 @@ func Test_UserIndex_AddUser(t *testing.T) {
 	var addUserCases = []struct {
 		nick string
 		url  string
-	}{{
-		nick: "testuser1",
-		url:  "https://example4.com/twtxt.txt",
-	},
+	}{
+		{
+			nick: "testuser1",
+			url:  "https://example4.com/twtxt.txt",
+		},
 		{
 			nick: "testuser2",
 			url:  "https://example5.com/twtxt.txt",
