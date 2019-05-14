@@ -1,4 +1,4 @@
-package registry // import "github.com/gbmor/getwtxt/registry"
+package registry // import "github.com/getwtxt/registry"
 
 import (
 	"sync"
