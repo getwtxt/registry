@@ -24,7 +24,29 @@ func Test_UserIndex_AddUser(t *testing.T) {
 		t.Run(tt.nick, func(t *testing.T) {
 			index.AddUser(tt.nick, tt.url)
 			if reflect.ValueOf(index[tt.url]).IsNil() {
-				t.Errorf("Failed to add user to index.\n")
+				t.Errorf("Failed to add user %v index.\n", tt.url)
+			}
+		})
+	}
+}
+
+func Test_UserIndex_DelUser(t *testing.T) {
+	index := initTestEnv()
+	var delUserCases = []struct {
+		url string
+	}{
+		{
+			url: "https://example.com/twtxt.txt",
+		},
+		{
+			url: "https://example3.com/twtxt.txt",
+		},
+	}
+	for _, tt := range delUserCases {
+		t.Run(tt.url, func(t *testing.T) {
+			index.DelUser(tt.url)
+			if !reflect.ValueOf(index[tt.url]).IsNil() {
+				t.Errorf("Failed to delete user %v from index.\n", tt.url)
 			}
 		})
 	}
