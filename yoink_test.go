@@ -21,7 +21,7 @@ func constructTwtxt() []byte {
 // this is just dumping all the mock statuses.
 // it'll be served under fake paths as
 // "remote" twtxt.txt files
-func twtxtHandler(w http.ResponseWriter, r *http.Request) {
+func twtxtHandler(w http.ResponseWriter, _ *http.Request) {
 	// prepare the response
 	resp := constructTwtxt()
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
