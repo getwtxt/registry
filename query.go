@@ -1,21 +1,26 @@
 package registry // import "github.com/getwtxt/registry"
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 )
 
 // QueryUser checks the user index for nicknames that contain the
 // nickname provided as an argument. Entries are returned sorted
-// by the date they were added to the index.
-func (index UserIndex) QueryUser(name string) []string {
+// by the date they were added to the index. If the argument
+// provided is blank, return all users.
+func (index UserIndex) QueryUser(name string) ([]string, error) {
+	if index == nil {
+		return nil, fmt.Errorf("can't query empty index")
+	}
 	timekey := NewTimeMap()
 	keys := make(TimeSlice, 0)
 	var users []string
 	imutex.RLock()
 	for k, v := range index {
 		if strings.Contains(v.Nick, name) {
-			timekey[v.Date] = v.Nick + "\t" + k + "\t" + string(v.APIdate)
+			timekey[v.Date] = v.Nick + "\t" + k + "\t" + string(v.APIdate) + "\n"
 			keys = append(keys, v.Date)
 		}
 	}
@@ -25,7 +30,7 @@ func (index UserIndex) QueryUser(name string) []string {
 		users = append(users, timekey[e])
 	}
 
-	return users
+	return users, nil
 }
 
 // QueryTag returns all the known statuses that
