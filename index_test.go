@@ -5,22 +5,23 @@ import (
 	"testing"
 )
 
+var addUserCases = []struct {
+	nick string
+	url  string
+}{
+	{
+		nick: "testuser1",
+		url:  "https://example4.com/twtxt.txt",
+	},
+	{
+		nick: "testuser2",
+		url:  "https://example5.com/twtxt.txt",
+	},
+}
+
 // Tests if we can successfully add a user to the index
 func Test_UserIndex_AddUser(t *testing.T) {
 	index := initTestEnv()
-	var addUserCases = []struct {
-		nick string
-		url  string
-	}{
-		{
-			nick: "testuser1",
-			url:  "https://example4.com/twtxt.txt",
-		},
-		{
-			nick: "testuser2",
-			url:  "https://example5.com/twtxt.txt",
-		},
-	}
 
 	for _, tt := range addUserCases {
 		t.Run(tt.nick, func(t *testing.T) {
@@ -40,20 +41,31 @@ func Test_UserIndex_AddUser(t *testing.T) {
 		})
 	}
 }
+func Benchmark_UserIndex_AddUser(b *testing.B) {
+	index := initTestEnv()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, tt := range addUserCases {
+			index.AddUser(tt.nick, tt.url)
+			index[tt.url] = &Data{}
+		}
+	}
+}
+
+var delUserCases = []struct {
+	url string
+}{
+	{
+		url: "https://example.com/twtxt.txt",
+	},
+	{
+		url: "https://example3.com/twtxt.txt",
+	},
+}
 
 // Tests if we can successfully delete a user from the index
 func Test_UserIndex_DelUser(t *testing.T) {
 	index := initTestEnv()
-	var delUserCases = []struct {
-		url string
-	}{
-		{
-			url: "https://example.com/twtxt.txt",
-		},
-		{
-			url: "https://example3.com/twtxt.txt",
-		},
-	}
 
 	for _, tt := range delUserCases {
 		t.Run(tt.url, func(t *testing.T) {
@@ -65,20 +77,44 @@ func Test_UserIndex_DelUser(t *testing.T) {
 		})
 	}
 }
+func Benchmark_UserIndex_DelUser(b *testing.B) {
+	index := initTestEnv()
+	data1 := &Data{
+		Nick:    index[delUserCases[0].url].Nick,
+		Date:    index[delUserCases[0].url].Date,
+		APIdate: index[delUserCases[0].url].APIdate,
+		Status:  index[delUserCases[0].url].Status,
+	}
+	data2 := &Data{
+		Nick:    index[delUserCases[1].url].Nick,
+		Date:    index[delUserCases[1].url].Date,
+		APIdate: index[delUserCases[1].url].APIdate,
+		Status:  index[delUserCases[1].url].Status,
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, tt := range delUserCases {
+			index.DelUser(tt.url)
+		}
+		index[delUserCases[0].url] = data1
+		index[delUserCases[1].url] = data2
+	}
+}
+
+var getUserStatusCases = []struct {
+	url string
+}{
+	{
+		url: "https://example.com/twtxt.txt",
+	},
+	{
+		url: "https://example3.com/twtxt.txt",
+	},
+}
 
 // Checks if we can retrieve a single user's statuses
 func Test_UserIndex_GetUserStatuses(t *testing.T) {
 	index := initTestEnv()
-	var getUserStatusCases = []struct {
-		url string
-	}{
-		{
-			url: "https://example.com/twtxt.txt",
-		},
-		{
-			url: "https://example3.com/twtxt.txt",
-		},
-	}
 
 	for _, tt := range getUserStatusCases {
 		t.Run(tt.url, func(t *testing.T) {
@@ -96,7 +132,15 @@ func Test_UserIndex_GetUserStatuses(t *testing.T) {
 			}
 		})
 	}
-
+}
+func Benchmark_UserIndex_GetUserStatuses(b *testing.B) {
+	index := initTestEnv()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, tt := range getUserStatusCases {
+			index.GetUserStatuses(tt.url)
+		}
+	}
 }
 
 // Tests if we can retrieve all user statuses at once
@@ -121,4 +165,11 @@ func Test_UserIndex_GetStatuses(t *testing.T) {
 			t.Errorf("Incorrect data retrieved as statuses.")
 		}
 	})
+}
+func Benchmark_UserIndex_GetStatuses(b *testing.B) {
+	index := initTestEnv()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		index.GetStatuses()
+	}
 }
