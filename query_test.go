@@ -6,20 +6,24 @@ import (
 )
 
 var queryUserCases = []struct {
-	nick    string
+	term    string
 	wantErr bool
 }{
 	{
-		nick:    "foo",
+		term:    "foo",
 		wantErr: false,
 	},
 	{
-		nick:    "example",
+		term:    "example",
+		wantErr: false,
+	},
+	{
+		term:    "",
+		wantErr: false,
+	},
+	{
+		term:    "doesntexist",
 		wantErr: true,
-	},
-	{
-		nick:    "",
-		wantErr: false,
 	},
 }
 
@@ -30,22 +34,22 @@ func Test_UserIndex_QueryUser(t *testing.T) {
 
 	for n, tt := range queryUserCases {
 
-		t.Run(tt.nick, func(t *testing.T) {
-			out, err := index.QueryUser(tt.nick)
+		t.Run(tt.term, func(t *testing.T) {
+			out, err := index.QueryUser(tt.term)
 
 			if out == nil && err != nil && !tt.wantErr {
-				t.Errorf("Received nil output or an error when unexpected. Case %v, %v, %v\n", n, tt.nick, err)
+				t.Errorf("Received nil output or an error when unexpected. Case %v, %v, %v\n", n, tt.term, err)
 			}
 
 			if out != nil && tt.wantErr {
-				t.Errorf("Received unexpected nil output when an error was expected. Case %v, %v\n", n, tt.nick)
+				t.Errorf("Received unexpected nil output when an error was expected. Case %v, %v\n", n, tt.term)
 			}
 
 			for _, e := range out {
 				one := strings.Split(e, "\t")
 
-				if !strings.Contains(one[0], tt.nick) {
-					t.Errorf("Received incorrect output: %v != %v\n", tt.nick, e)
+				if !strings.Contains(one[0], tt.term) && !strings.Contains(one[1], tt.term) {
+					t.Errorf("Received incorrect output: %v != %v\n", tt.term, e)
 				}
 			}
 		})
@@ -57,7 +61,7 @@ func Benchmark_UserIndex_QueryUser(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range queryUserCases {
-			index.QueryUser(tt.nick)
+			index.QueryUser(tt.term)
 		}
 	}
 }
@@ -94,6 +98,9 @@ var queryInStatusCases = []struct {
 	},
 }
 
+// This tests whether we can find a substring in all of
+// the known status messages, disregarding the metadata
+// stored with each status.
 func Test_UserIndex_QueryInStatus(t *testing.T) {
 	index := initTestEnv()
 
@@ -155,6 +162,10 @@ func Benchmark_UserIndex_QueryInStatus(b *testing.B) {
 		}
 	}
 }
+
+// This tests whether we can find a substring in the
+// given user's status messages, disregarding the metadata
+// stored with each status.
 func Test_Data_FindInStatus(t *testing.T) {
 	index := initTestEnv()
 	data := make([]*Data, 0)

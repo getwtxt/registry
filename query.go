@@ -2,15 +2,16 @@ package registry // import "github.com/getwtxt/registry"
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 )
 
-// QueryUser checks the user index for nicknames that contain the
-// nickname provided as an argument. Entries are returned sorted
-// by the date they were added to the index. If the argument
-// provided is blank, return all users.
-func (index UserIndex) QueryUser(name string) ([]string, error) {
+// QueryUser checks the user index for usernames or URLs that contain the
+// term provided as an argument. Entries are returned sorted by the date
+// they were added to the index. If the argument provided is blank, return
+// all users.
+func (index UserIndex) QueryUser(term string) ([]string, error) {
 
 	if index == nil {
 		return nil, fmt.Errorf("can't query empty index")
@@ -22,7 +23,7 @@ func (index UserIndex) QueryUser(name string) ([]string, error) {
 
 	imutex.RLock()
 	for k, v := range index {
-		if strings.Contains(v.Nick, name) {
+		if strings.Contains(v.Nick, term) || strings.Contains(k, term) {
 			timekey[v.Date] = v.Nick + "\t" + k + "\t" + string(v.APIdate) + "\n"
 			keys = append(keys, v.Date)
 		}
@@ -56,8 +57,23 @@ func (index UserIndex) QueryInStatus(substr string) ([]string, error) {
 	return statusmap.SortByTime(), nil
 }
 
-// FindInStatus takes a user's tweets and looks for a given tag.
-// Returns the tweets with the tag as a []string.
+// QueryLatestStatuses returns the 20 most recent statuses
+// in the registry sorted by time.
+func (index UserIndex) QueryLatestStatuses() ([]string, error) {
+	statusmap, err := index.GetStatuses()
+	if err != nil {
+		log.Printf("Couldn't retrieve statuses from index: %v\n", err)
+	}
+
+	statusmaps := NewTimeMapSlice()
+	statusmaps = append(statusmaps, statusmap)
+	sorted := statusmaps.SortByTime()
+
+	return sorted[:19], nil
+}
+
+// FindInStatus takes a user's statuses and looks for a given substring.
+// Returns the statuses with the substring as a []string.
 func (userdata *Data) FindInStatus(word string) TimeMap {
 
 	statuses := NewTimeMap()
