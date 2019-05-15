@@ -79,13 +79,24 @@ func Benchmark_UserIndex_AddUser(b *testing.B) {
 }
 
 var delUserCases = []struct {
-	url string
+	url     string
+	wantErr bool
 }{
 	{
-		url: "https://example.com/twtxt.txt",
+		url:     "https://example.com/twtxt.txt",
+		wantErr: false,
 	},
 	{
-		url: "https://example3.com/twtxt.txt",
+		url:     "https://example3.com/twtxt.txt",
+		wantErr: false,
+	},
+	{
+		url:     "https://example3.com/twtxt.txt",
+		wantErr: true,
+	},
+	{
+		url:     "",
+		wantErr: true,
 	},
 }
 
@@ -93,12 +104,18 @@ var delUserCases = []struct {
 func Test_UserIndex_DelUser(t *testing.T) {
 	index := initTestEnv()
 
-	for _, tt := range delUserCases {
+	for n, tt := range delUserCases {
 		t.Run(tt.url, func(t *testing.T) {
 
-			index.DelUser(tt.url)
+			err := index.DelUser(tt.url)
 			if !reflect.ValueOf(index[tt.url]).IsNil() {
 				t.Errorf("Failed to delete user %v from index.\n", tt.url)
+			}
+			if tt.wantErr && err == nil {
+				t.Errorf("Expected error but did not receive. Case %v\n", n)
+			}
+			if !tt.wantErr && err != nil {
+				t.Errorf("Unexpected error for case %v: %v\n", n, err)
 			}
 		})
 	}
@@ -128,13 +145,24 @@ func Benchmark_UserIndex_DelUser(b *testing.B) {
 }
 
 var getUserStatusCases = []struct {
-	url string
+	url     string
+	wantErr bool
 }{
 	{
-		url: "https://example.com/twtxt.txt",
+		url:     "https://example.com/twtxt.txt",
+		wantErr: false,
 	},
 	{
-		url: "https://example3.com/twtxt.txt",
+		url:     "https://example3.com/twtxt.txt",
+		wantErr: false,
+	},
+	{
+		url:     "https://doesn't.exist/twtxt.txt",
+		wantErr: true,
+	},
+	{
+		url:     "",
+		wantErr: true,
 	},
 }
 
@@ -142,19 +170,25 @@ var getUserStatusCases = []struct {
 func Test_UserIndex_GetUserStatuses(t *testing.T) {
 	index := initTestEnv()
 
-	for _, tt := range getUserStatusCases {
+	for n, tt := range getUserStatusCases {
 		t.Run(tt.url, func(t *testing.T) {
 
-			statuses := index.GetUserStatuses(tt.url)
-			if reflect.ValueOf(statuses).IsNil() {
-				t.Errorf("Failed to pull statuses for user %v\n", tt.url)
+			statuses, err := index.GetUserStatuses(tt.url)
+
+			if !tt.wantErr {
+				if reflect.ValueOf(statuses).IsNil() {
+					t.Errorf("Failed to pull statuses for user %v\n", tt.url)
+				}
+				// see if the function returns the same data
+				// that we already have
+				data := index[tt.url]
+				if !reflect.DeepEqual(data.Status, statuses) {
+					t.Errorf("Incorrect data retrieved as statuses for user %v.\n", tt.url)
+				}
 			}
 
-			// see if the function returns the same data
-			// that we already have
-			data := index[tt.url]
-			if !reflect.DeepEqual(data.Status, statuses) {
-				t.Errorf("Incorrect data retrieved as statuses for user %v.\n", tt.url)
+			if tt.wantErr && err == nil {
+				t.Errorf("Expected error, received nil for case %v: %v\n", n, tt.url)
 			}
 		})
 	}
@@ -174,9 +208,9 @@ func Test_UserIndex_GetStatuses(t *testing.T) {
 	index := initTestEnv()
 	t.Run("UserIndex.GetStatuses()", func(t *testing.T) {
 
-		statuses := index.GetStatuses()
-		if reflect.ValueOf(statuses).IsNil() {
-			t.Errorf("Failed to pull all statuses.")
+		statuses, err := index.GetStatuses()
+		if reflect.ValueOf(statuses).IsNil() || err != nil {
+			t.Errorf("Failed to pull all statuses. %v\n", err)
 		}
 
 		// Now do the same query manually to see
@@ -188,7 +222,7 @@ func Test_UserIndex_GetStatuses(t *testing.T) {
 			}
 		}
 		if !reflect.DeepEqual(statuses, unionmap) {
-			t.Errorf("Incorrect data retrieved as statuses.")
+			t.Errorf("Incorrect data retrieved as statuses.\n")
 		}
 	})
 }
