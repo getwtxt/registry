@@ -62,41 +62,46 @@ func Benchmark_UserIndex_QueryUser(b *testing.B) {
 	}
 }
 
-var queryTagCases = []struct {
+var queryInStatusCases = []struct {
 	tag     string
+	mention string
 	wantNil bool
 	wantErr bool
 }{
 	{
 		tag:     "twtxt",
+		mention: "https://example.com/twtxt.txt",
 		wantNil: false,
 		wantErr: false,
 	},
 	{
 		tag:     "project",
+		mention: "https://example3.com/twtxt.txt",
 		wantNil: false,
 		wantErr: false,
 	},
 	{
 		tag:     "",
+		mention: "",
 		wantNil: true,
 		wantErr: true,
 	},
 	{
 		tag:     "ahfiurrenkhfkajdhfao",
+		mention: "https://doesnt.exist/twtxt.txt",
 		wantNil: true,
 		wantErr: false,
 	},
 }
 
-func Test_UserIndex_QueryTag(t *testing.T) {
+func Test_UserIndex_QueryInStatus(t *testing.T) {
 	index := initTestEnv()
 
-	for _, tt := range queryTagCases {
+	for _, tt := range queryInStatusCases {
 
 		t.Run(tt.tag, func(t *testing.T) {
 
-			out, err := index.QueryTag(tt.tag)
+			out, err := index.QueryInStatus(tt.tag)
 			if err != nil && !tt.wantErr {
 				t.Errorf("Caught unexpected error: %v\n", err)
 			}
@@ -116,21 +121,41 @@ func Test_UserIndex_QueryTag(t *testing.T) {
 					t.Errorf("Status without tag\n")
 				}
 			}
+			out, err = index.QueryInStatus(tt.mention)
+			if err != nil && !tt.wantErr {
+				t.Errorf("Caught unexpected error: %v\n", err)
+			}
+
+			if !tt.wantErr && out == nil && !tt.wantNil {
+				t.Errorf("Got nil when expecting output\n")
+			}
+
+			if err == nil && tt.wantErr {
+				t.Errorf("Expecting error, got nil.\n")
+			}
+
+			for _, e := range out {
+				split := strings.Split(e, "\t")
+
+				if !strings.Contains(split[3], tt.mention) {
+					t.Errorf("Status without tag\n")
+				}
+			}
 		})
 	}
 
 }
-func Benchmark_UserIndex_QueryTag(b *testing.B) {
+func Benchmark_UserIndex_QueryInStatus(b *testing.B) {
 	index := initTestEnv()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		for _, tt := range queryTagCases {
-			index.QueryTag(tt.tag)
+		for _, tt := range queryInStatusCases {
+			index.QueryInStatus(tt.tag)
 		}
 	}
 }
-func Test_Data_FindTag(t *testing.T) {
+func Test_Data_FindInStatus(t *testing.T) {
 	index := initTestEnv()
 	data := make([]*Data, 0)
 
@@ -142,7 +167,7 @@ func Test_Data_FindTag(t *testing.T) {
 	for _, tt := range data {
 		t.Run(tt.Nick, func(t *testing.T) {
 
-			tag := tt.FindTag(queryTagCases[i].tag)
+			tag := tt.FindInStatus(queryInStatusCases[i].tag)
 			if tag == nil {
 				t.Errorf("Got nil tag\n")
 			}
@@ -151,7 +176,7 @@ func Test_Data_FindTag(t *testing.T) {
 	}
 
 }
-func Benchmark_Data_FindTag(b *testing.B) {
+func Benchmark_Data_FindInStatus(b *testing.B) {
 	index := initTestEnv()
 	data := make([]*Data, 0)
 
@@ -162,8 +187,8 @@ func Benchmark_Data_FindTag(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range data {
-			for _, v := range queryTagCases {
-				tt.FindTag(v.tag)
+			for _, v := range queryInStatusCases {
+				tt.FindInStatus(v.tag)
 			}
 		}
 	}

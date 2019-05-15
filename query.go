@@ -37,11 +37,11 @@ func (index UserIndex) QueryUser(name string) ([]string, error) {
 	return users, nil
 }
 
-// QueryTag returns all the known statuses that
-// contain the provided tag.
-func (index UserIndex) QueryTag(tag string) ([]string, error) {
+// QueryInStatus returns all the known statuses that
+// contain the provided substring (tag, mention URL, etc).
+func (index UserIndex) QueryInStatus(substr string) ([]string, error) {
 
-	if tag == "" {
+	if substr == "" {
 		return nil, fmt.Errorf("cannot query for empty tag")
 	}
 
@@ -49,16 +49,16 @@ func (index UserIndex) QueryTag(tag string) ([]string, error) {
 
 	imutex.RLock()
 	for _, v := range index {
-		statusmap = append(statusmap, v.FindTag(tag))
+		statusmap = append(statusmap, v.FindInStatus(substr))
 	}
 	imutex.RUnlock()
 
 	return statusmap.SortByTime(), nil
 }
 
-// FindTag takes a user's tweets and looks for a given tag.
+// FindInStatus takes a user's tweets and looks for a given tag.
 // Returns the tweets with the tag as a []string.
-func (userdata *Data) FindTag(tag string) TimeMap {
+func (userdata *Data) FindInStatus(word string) TimeMap {
 
 	statuses := NewTimeMap()
 
@@ -68,7 +68,7 @@ func (userdata *Data) FindTag(tag string) TimeMap {
 
 		for _, v := range statusslice {
 
-			if strings.Contains(v, tag) {
+			if strings.Contains(v, word) {
 				statuses[k] = e
 				break
 			}

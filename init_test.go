@@ -60,7 +60,7 @@ func initTestEnv() UserIndex {
 			apidate: timeFourMonthsPrevRFC,
 			status: TimeMap{
 				timeFourMonthsPrev:  "foo\thttps://example3.com/twtxt.txt\t" + string(timeFourMonthsPrevRFC) + "\tThis is so much better than #twitter",
-				timeThreeMonthsPrev: "foo\thttps://example3.com/twtxt.txt\t" + string(timeThreeMonthsPrevRFC) + "\tI can't wait to start on my next programming #project",
+				timeThreeMonthsPrev: "foo\thttps://example3.com/twtxt.txt\t" + string(timeThreeMonthsPrevRFC) + "\tI can't wait to start on my next programming #project with <@foo_barrington https://example3.com/twtxt.txt>",
 			},
 		},
 	}
