@@ -67,32 +67,42 @@ func Benchmark_UserIndex_QueryUser(b *testing.B) {
 }
 
 var queryInStatusCases = []struct {
-	tag     string
-	mention string
+	substr  string
 	wantNil bool
 	wantErr bool
 }{
 	{
-		tag:     "twtxt",
-		mention: "https://example.com/twtxt.txt",
+		substr:  "twtxt",
 		wantNil: false,
 		wantErr: false,
 	},
 	{
-		tag:     "project",
-		mention: "https://example3.com/twtxt.txt",
+		substr:  "https://example.com/twtxt.txt",
 		wantNil: false,
 		wantErr: false,
 	},
 	{
-		tag:     "",
-		mention: "",
+		substr:  "project",
+		wantNil: false,
+		wantErr: false,
+	},
+	{
+		substr:  "https://example3.com/twtxt.txt",
+		wantNil: false,
+		wantErr: false,
+	},
+	{
+		substr:  "",
 		wantNil: true,
 		wantErr: true,
 	},
 	{
-		tag:     "ahfiurrenkhfkajdhfao",
-		mention: "https://doesnt.exist/twtxt.txt",
+		substr:  "ahfiurrenkhfkajdhfao",
+		wantNil: true,
+		wantErr: false,
+	},
+	{
+		substr:  "https://doesnt.exist/twtxt.txt",
 		wantNil: true,
 		wantErr: false,
 	},
@@ -106,9 +116,9 @@ func Test_UserIndex_QueryInStatus(t *testing.T) {
 
 	for _, tt := range queryInStatusCases {
 
-		t.Run(tt.tag, func(t *testing.T) {
+		t.Run(tt.substr, func(t *testing.T) {
 
-			out, err := index.QueryInStatus(tt.tag)
+			out, err := index.QueryInStatus(tt.substr)
 			if err != nil && !tt.wantErr {
 				t.Errorf("Caught unexpected error: %v\n", err)
 			}
@@ -124,28 +134,8 @@ func Test_UserIndex_QueryInStatus(t *testing.T) {
 			for _, e := range out {
 				split := strings.Split(e, "\t")
 
-				if !strings.Contains(split[3], tt.tag) {
-					t.Errorf("Status without tag\n")
-				}
-			}
-			out, err = index.QueryInStatus(tt.mention)
-			if err != nil && !tt.wantErr {
-				t.Errorf("Caught unexpected error: %v\n", err)
-			}
-
-			if !tt.wantErr && out == nil && !tt.wantNil {
-				t.Errorf("Got nil when expecting output\n")
-			}
-
-			if err == nil && tt.wantErr {
-				t.Errorf("Expecting error, got nil.\n")
-			}
-
-			for _, e := range out {
-				split := strings.Split(e, "\t")
-
-				if !strings.Contains(split[3], tt.mention) {
-					t.Errorf("Status without tag\n")
+				if !strings.Contains(split[3], tt.substr) {
+					t.Errorf("Status without substring returned\n")
 				}
 			}
 		})
@@ -158,7 +148,7 @@ func Benchmark_UserIndex_QueryInStatus(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range queryInStatusCases {
-			index.QueryInStatus(tt.tag)
+			index.QueryInStatus(tt.substr)
 		}
 	}
 }
@@ -197,7 +187,7 @@ func Test_Data_FindInStatus(t *testing.T) {
 	for _, tt := range data {
 		t.Run(tt.Nick, func(t *testing.T) {
 
-			tag := tt.FindInStatus(queryInStatusCases[i].tag)
+			tag := tt.FindInStatus(queryInStatusCases[i].substr)
 			if tag == nil {
 				t.Errorf("Got nil tag\n")
 			}
@@ -218,7 +208,7 @@ func Benchmark_Data_FindInStatus(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, tt := range data {
 			for _, v := range queryInStatusCases {
-				tt.FindInStatus(v.tag)
+				tt.FindInStatus(v.substr)
 			}
 		}
 	}
