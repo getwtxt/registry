@@ -11,6 +11,7 @@ a minimum. No need for `memcached`, etc.
 - [x] Queries (Users, Mentions, Tags) with time-sorted output
 - [ ] twtxt.txt file scraping functions
 - [ ] Bridge in-memory cache to persistent storage
+- [ ] Refactor and optimize
 
 ### Notes
 
