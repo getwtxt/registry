@@ -45,7 +45,7 @@ type TimeSlice []time.Time
 
 // NewUserIndex returns a new instance of a user index
 func NewUserIndex() UserIndex {
-	return map[string]*Data{}
+	return make(UserIndex)
 }
 
 // NewTimeMap returns an initialized TimeMap.
