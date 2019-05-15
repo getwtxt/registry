@@ -6,16 +6,29 @@ import (
 )
 
 var addUserCases = []struct {
-	nick string
-	url  string
+	nick    string
+	url     string
+	wantErr bool
 }{
 	{
-		nick: "testuser1",
-		url:  "https://example4.com/twtxt.txt",
+		nick:    "testuser1",
+		url:     "https://example4.com/twtxt.txt",
+		wantErr: false,
 	},
 	{
-		nick: "testuser2",
-		url:  "https://example5.com/twtxt.txt",
+		nick:    "testuser2",
+		url:     "https://example5.com/twtxt.txt",
+		wantErr: false,
+	},
+	{
+		nick:    "testuser1",
+		url:     "https://example4.com/twtxt.txt",
+		wantErr: true,
+	},
+	{
+		nick:    "",
+		url:     "",
+		wantErr: true,
 	},
 }
 
@@ -23,20 +36,29 @@ var addUserCases = []struct {
 func Test_UserIndex_AddUser(t *testing.T) {
 	index := initTestEnv()
 
-	for _, tt := range addUserCases {
+	for n, tt := range addUserCases {
 		t.Run(tt.nick, func(t *testing.T) {
 
-			index.AddUser(tt.nick, tt.url)
-			if reflect.ValueOf(index[tt.url]).IsNil() {
-				t.Errorf("Failed to add user %v index.\n", tt.url)
-			}
+			err := index.AddUser(tt.nick, tt.url)
+			if !tt.wantErr {
+				if err != nil {
+					t.Errorf("Got error: %v\n", err)
+				}
+				if reflect.ValueOf(index[tt.url]).IsNil() {
+					t.Errorf("Failed to add user %v index.\n", tt.url)
+				}
 
-			// see if the nick in the index is the same
-			// as the test case. verifies the URL and the nick
-			// since the URL is used as the key
-			data := index[tt.url]
-			if data.Nick != tt.nick {
-				t.Errorf("Incorrect user data added to index for user %v.\n", tt.url)
+				// see if the nick in the index is the same
+				// as the test case. verifies the URL and the nick
+				// since the URL is used as the key
+				data := index[tt.url]
+				if data.Nick != tt.nick {
+					t.Errorf("Incorrect user data added to index for user %v.\n", tt.url)
+				}
+			}
+			// check for the cases that should throw an error
+			if tt.wantErr && err == nil {
+				t.Errorf("Expected error for case %v, got nil\n", n)
 			}
 		})
 	}
