@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http" // GetTwtxt fetches the raw twtxt.txt file from the remote server
+	"net/http"
 	"net/url"
 )
 
