@@ -2,13 +2,13 @@
 
 This is a library that implements a custom-rolled twtxt registry. The
 specific needs of getwtxt are addressed here with respect to retrieval,
-storage, and querying of user data.
+storage, and querying of user data. External dependencies are kept to
+a minimum. No need for memcached, etc.
 
-- [x] Maintain over 90% test coverage
-- [x] Define types
-- [x] Create in-memory cache objects
+- [x] Maintain over 90% test coverage during development process
+- [x] Define types and create in-memory cache objects
 - [x] Basic actions (Add, Delete users)
-- [x] Queries (Users, Mentions, Tags)
+- [x] Queries (Users, Mentions, Tags) with time-sorted output
 - [ ] twtxt.txt file scraping functions
 - [ ] Bridge in-memory cache to persistent storage
 
