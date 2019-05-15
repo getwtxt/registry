@@ -34,37 +34,47 @@ func twtxtHandler(w http.ResponseWriter, _ *http.Request) {
 var getTwtxtCases = []struct {
 	url     string
 	wantErr bool
+	local   bool
 }{
 	{
 		url:     "http://localhost:8080/twtxt.txt",
 		wantErr: false,
+		local:   true,
 	},
 	{
 		url:     "https://example3.com/twtxt.txt",
 		wantErr: true,
+		local:   false,
 	},
 	{
 		url:     "https://example3.com",
 		wantErr: true,
+		local:   false,
 	},
 	{
 		url:     "file://init_test.go",
 		wantErr: true,
+		local:   false,
 	},
 	{
 		url:     "/etc/passwd",
 		wantErr: true,
+		local:   false,
 	},
 }
 
 // Test the function that yoinks the /twtxt.txt file
 // for a given user.
 func Test_GetTwtxt(t *testing.T) {
+
 	http.Handle("/twtxt.txt", http.HandlerFunc(twtxtHandler))
 	go http.ListenAndServe(":8080", nil)
 
 	for _, tt := range getTwtxtCases {
 		t.Run(tt.url, func(t *testing.T) {
+			if tt.local {
+				t.Skipf("Local-only test. Skipping ... \n")
+			}
 			out, err := GetTwtxt(tt.url)
 			if tt.wantErr && err == nil {
 				t.Errorf("Expected error: %v\n", tt.url)
