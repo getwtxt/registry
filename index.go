@@ -29,7 +29,7 @@ func (index UserIndex) AddUser(nick string, url string) error {
 	}
 
 	imutex.Lock()
-	index[url] = &Data{Nick: nick, Date: time.Now(), APIdate: rfc3339date}
+	index[url] = &Data{Nick: nick, Date: thetime, APIdate: rfc3339date}
 	imutex.Unlock()
 
 	return nil
