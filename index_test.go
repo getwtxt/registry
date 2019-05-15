@@ -40,10 +40,14 @@ func Test_UserIndex_AddUser(t *testing.T) {
 		t.Run(tt.nick, func(t *testing.T) {
 
 			err := index.AddUser(tt.nick, tt.url)
+
+			// only run some checks if we don't want an error
 			if !tt.wantErr {
 				if err != nil {
 					t.Errorf("Got error: %v\n", err)
 				}
+
+				// make sure we have *something* in the index
 				if reflect.ValueOf(index[tt.url]).IsNil() {
 					t.Errorf("Failed to add user %v index.\n", tt.url)
 				}
