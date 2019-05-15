@@ -2,6 +2,7 @@ package registry //import "github.com/getwtxt/registry"
 
 import (
 	"log"
+	"os"
 	"time"
 )
 
@@ -13,6 +14,9 @@ func quickErr(err error) {
 
 // Sets up mock users and statuses
 func initTestEnv() UserIndex {
+	hush, err := os.Open("/dev/null")
+	quickErr(err)
+	log.SetOutput(hush)
 
 	// this is a bit tedious, but set up fake dates
 	// for the mock users' join and status timestamps
