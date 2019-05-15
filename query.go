@@ -2,7 +2,6 @@ package registry // import "github.com/getwtxt/registry"
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 )
@@ -62,13 +61,16 @@ func (index UserIndex) QueryInStatus(substr string) ([]string, error) {
 func (index UserIndex) QueryLatestStatuses() ([]string, error) {
 	statusmap, err := index.GetStatuses()
 	if err != nil {
-		log.Printf("Couldn't retrieve statuses from index: %v\n", err)
+		return nil, fmt.Errorf("%v", err)
 	}
 
 	statusmaps := NewTimeMapSlice()
 	statusmaps = append(statusmaps, statusmap)
 	sorted := statusmaps.SortByTime()
 
+	if len(sorted) < 20 {
+		return sorted, nil
+	}
 	return sorted[:19], nil
 }
 

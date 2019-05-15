@@ -163,6 +163,25 @@ func Benchmark_UserIndex_QueryInStatus(b *testing.B) {
 	}
 }
 
+// Tests whether we can retrieve the 20 most
+// recent statuses in the index
+func Test_QueryLatestStatuses(t *testing.T) {
+	index := initTestEnv()
+	t.Run("Latest Statuses", func(t *testing.T) {
+		out, err := index.QueryLatestStatuses()
+		if out == nil || len(out) > 20 || err != nil {
+			t.Errorf("Got no statuses, or more than 20: %v, %v\n", len(out), err)
+		}
+	})
+}
+func Benchmark_QueryLatestStatuses(b *testing.B) {
+	index := initTestEnv()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		index.QueryLatestStatuses()
+	}
+}
+
 // This tests whether we can find a substring in the
 // given user's status messages, disregarding the metadata
 // stored with each status.
