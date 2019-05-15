@@ -14,9 +14,10 @@ func (index UserIndex) AddUser(nick string, url string) error {
 	}
 	if _, ok := index[url]; ok {
 		log.Printf("User %v can't be added - already exists.\n", url)
-		return fmt.Errorf("user already exists")
+		return fmt.Errorf("user %v already exists", url)
 	}
-	rfc3339date, err := time.Now().MarshalText()
+	thetime := time.Now()
+	rfc3339date, err := thetime.MarshalText()
 	if err != nil {
 		log.Printf("Error formatting user add time as RFC3339: %v\n", err)
 	}
