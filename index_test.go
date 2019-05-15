@@ -122,12 +122,14 @@ func Test_UserIndex_DelUser(t *testing.T) {
 }
 func Benchmark_UserIndex_DelUser(b *testing.B) {
 	index := initTestEnv()
+
 	data1 := &Data{
 		Nick:    index[delUserCases[0].url].Nick,
 		Date:    index[delUserCases[0].url].Date,
 		APIdate: index[delUserCases[0].url].APIdate,
 		Status:  index[delUserCases[0].url].Status,
 	}
+
 	data2 := &Data{
 		Nick:    index[delUserCases[1].url].Nick,
 		Date:    index[delUserCases[1].url].Date,
@@ -135,10 +137,12 @@ func Benchmark_UserIndex_DelUser(b *testing.B) {
 		Status:  index[delUserCases[1].url].Status,
 	}
 	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		for _, tt := range delUserCases {
 			index.DelUser(tt.url)
 		}
+
 		index[delUserCases[0].url] = data1
 		index[delUserCases[1].url] = data2
 	}
@@ -196,6 +200,7 @@ func Test_UserIndex_GetUserStatuses(t *testing.T) {
 func Benchmark_UserIndex_GetUserStatuses(b *testing.B) {
 	index := initTestEnv()
 	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		for _, tt := range getUserStatusCases {
 			index.GetUserStatuses(tt.url)
@@ -229,6 +234,7 @@ func Test_UserIndex_GetStatuses(t *testing.T) {
 func Benchmark_UserIndex_GetStatuses(b *testing.B) {
 	index := initTestEnv()
 	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		index.GetStatuses()
 	}

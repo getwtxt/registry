@@ -23,15 +23,19 @@ func initTestEnv() UserIndex {
 	timeMonthPrev := time.Now().AddDate(0, -1, 0)
 	timeMonthPrevRFC, err := timeMonthPrev.MarshalText()
 	quickErr(err)
+
 	timeTwoMonthsPrev := time.Now().AddDate(0, -2, 0)
 	timeTwoMonthsPrevRFC, err := timeTwoMonthsPrev.MarshalText()
 	quickErr(err)
+
 	timeThreeMonthsPrev := time.Now().AddDate(0, -3, 0)
 	timeThreeMonthsPrevRFC, err := timeThreeMonthsPrev.MarshalText()
 	quickErr(err)
+
 	timeFourMonthsPrev := time.Now().AddDate(0, -4, 0)
 	timeFourMonthsPrevRFC, err := timeFourMonthsPrev.MarshalText()
 	quickErr(err)
+
 	var mockusers = []struct {
 		url     string
 		nick    string
