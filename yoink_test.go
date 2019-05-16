@@ -71,11 +71,22 @@ var getTwtxtCases = []struct {
 		wantErr:   true,
 		localOnly: false,
 	},
+	{
+		url:       "this will be replaced with garbage data",
+		wantErr:   true,
+		localOnly: false,
+	},
 }
 
 // Test the function that yoinks the /twtxt.txt file
 // for a given user.
 func Test_GetTwtxt(t *testing.T) {
+	var buf = make([]byte, 256)
+	// read random data into case 4
+	rando, _ := os.Open("/dev/random")
+	reader := bufio.NewReader(rando)
+	reader.Read(buf)
+	getTwtxtCases[6].url = string(buf)
 
 	http.Handle("/twtxt.txt", http.HandlerFunc(twtxtHandler))
 	go http.ListenAndServe(":8080", nil)
