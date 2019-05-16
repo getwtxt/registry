@@ -37,44 +37,52 @@ func twtxtHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 var getTwtxtCases = []struct {
+	name      string
 	url       string
 	wantErr   bool
 	localOnly bool
 }{
 	{
+		name:      "http://localhost:8080/twtxt.txt",
 		url:       "http://localhost:8080/twtxt.txt",
 		wantErr:   false,
 		localOnly: true,
 	},
 	{
+		name:      "https://example33333333333.com/twtxt.txt",
 		url:       "https://example33333333333.com/twtxt.txt",
 		wantErr:   true,
 		localOnly: false,
 	},
 	{
+		name:      "https://example333333333333.com",
 		url:       "https://example333333333333.com",
 		wantErr:   true,
 		localOnly: false,
 	},
 	{
+		name:      "file://init_test.go",
 		url:       "file://init_test.go",
 		wantErr:   true,
 		localOnly: false,
 	},
 	{
+		name:      "/etc/passwd",
 		url:       "/etc/passwd",
 		wantErr:   true,
 		localOnly: false,
 	},
 	{
+		name:      "https://example.com/file.cgi",
 		url:       "https://example.com/file.cgi",
 		wantErr:   true,
 		localOnly: false,
 	},
 	{
+		name:      "Garbage Data",
 		url:       "this will be replaced with garbage data",
 		wantErr:   true,
-		localOnly: false,
+		localOnly: true,
 	},
 }
 
@@ -88,11 +96,13 @@ func Test_GetTwtxt(t *testing.T) {
 	reader.Read(buf)
 	getTwtxtCases[6].url = string(buf)
 
-	http.Handle("/twtxt.txt", http.HandlerFunc(twtxtHandler))
-	go http.ListenAndServe(":8080", nil)
+	if !getTwtxtCases[0].localOnly {
+		http.Handle("/twtxt.txt", http.HandlerFunc(twtxtHandler))
+		go http.ListenAndServe(":8080", nil)
+	}
 
 	for _, tt := range getTwtxtCases {
-		t.Run(tt.url, func(t *testing.T) {
+		t.Run(tt.name, func(t *testing.T) {
 			if tt.localOnly {
 				t.Skipf("Local-only test. Skipping ... \n")
 			}
@@ -117,9 +127,7 @@ func Benchmark_GetTwtxt(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range getTwtxtCases {
-			b.Run(tt.url, func(b *testing.B) {
-				GetTwtxt(tt.url)
-			})
+			GetTwtxt(tt.url)
 		}
 	}
 }

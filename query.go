@@ -14,8 +14,8 @@ import (
 // all users.
 func (index UserIndex) QueryUser(term string) ([]string, error) {
 
-	if index == nil {
-		return nil, fmt.Errorf("can't query empty index")
+	if index == nil || len(index) == 0 {
+		return nil, fmt.Errorf("can't query empty index for user")
 	}
 
 	timekey := NewTimeMap()
@@ -45,6 +45,8 @@ func (index UserIndex) QueryInStatus(substr string) ([]string, error) {
 
 	if substr == "" {
 		return nil, fmt.Errorf("cannot query for empty tag")
+	} else if len(index) == 0 || index == nil {
+		return nil, fmt.Errorf("can't query statuses of empty index")
 	}
 
 	statusmap := NewTimeMapSlice()
@@ -61,6 +63,10 @@ func (index UserIndex) QueryInStatus(substr string) ([]string, error) {
 // QueryLatestStatuses returns the 20 most recent statuses
 // in the registry sorted by timestamp.
 func (index UserIndex) QueryLatestStatuses() ([]string, error) {
+	if index == nil || len(index) == 0 {
+		return nil, fmt.Errorf("can't get latest statuses from empty index")
+	}
+
 	statusmap, err := index.GetStatuses()
 	if err != nil {
 		return nil, fmt.Errorf("%v", err)
@@ -79,6 +85,9 @@ func (index UserIndex) QueryLatestStatuses() ([]string, error) {
 // FindInStatus takes a user's statuses and looks for a given substring.
 // Returns the statuses with the substring as a []string.
 func (userdata *Data) FindInStatus(word string) TimeMap {
+	if userdata == nil {
+		return nil
+	}
 
 	statuses := NewTimeMap()
 
@@ -101,6 +110,9 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 // SortByTime returns a string slice of the query results,
 // sorted by time.Time. The receiver is a TimeMapSlice.
 func (tm TimeMapSlice) SortByTime() []string {
+	if tm == nil {
+		return nil
+	}
 
 	var unionmap = NewTimeMap()
 	var times = make(TimeSlice, 0)

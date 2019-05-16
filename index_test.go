@@ -3,43 +3,62 @@
 package registry // import "github.com/getwtxt/registry"
 
 import (
+	"net/http"
 	"reflect"
 	"testing"
 )
 
 var addUserCases = []struct {
-	nick    string
-	url     string
-	wantErr bool
+	nick      string
+	url       string
+	wantErr   bool
+	localOnly bool
 }{
 	{
-		nick:    "testuser1",
-		url:     "https://example4.com/twtxt.txt",
-		wantErr: false,
+		nick:      "testuser1",
+		url:       "http://localhost:8080/twtxt.txt",
+		wantErr:   false,
+		localOnly: true,
 	},
 	{
-		nick:    "testuser2",
-		url:     "https://example5.com/twtxt.txt",
-		wantErr: false,
+		nick:      "testuser2",
+		url:       "https://example555555555.com/twtxt.txt",
+		wantErr:   true,
+		localOnly: false,
 	},
 	{
-		nick:    "testuser1",
-		url:     "https://example4.com/twtxt.txt",
-		wantErr: true,
+		nick:      "testuser1",
+		url:       "https://example444444444.com/twtxt.txt",
+		wantErr:   true,
+		localOnly: false,
 	},
 	{
-		nick:    "",
-		url:     "",
-		wantErr: true,
+		nick:      "",
+		url:       "",
+		wantErr:   true,
+		localOnly: false,
+	},
+	{
+		nick:      "foo",
+		url:       "foobarringtons",
+		wantErr:   true,
+		localOnly: false,
 	},
 }
 
 // Tests if we can successfully add a user to the index
 func Test_UserIndex_AddUser(t *testing.T) {
 	index := initTestEnv()
+	if !addUserCases[0].localOnly {
+		http.Handle("/twtxt.txt", http.HandlerFunc(twtxtHandler))
+		go http.ListenAndServe(":8080", nil)
+	}
 
 	for n, tt := range addUserCases {
 		t.Run(tt.nick, func(t *testing.T) {
+			if tt.localOnly {
+				t.Skipf("Local-only test. Skipping ... ")
+			}
 
 			err := index.AddUser(tt.nick, tt.url)
 

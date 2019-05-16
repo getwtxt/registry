@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 )
@@ -20,9 +19,8 @@ func GetTwtxt(urls string) ([]byte, error) {
 
 	// Check that we were provided a valid
 	// URL in the first place.
-	_, err := url.Parse(urls)
-	if err != nil {
-		return nil, fmt.Errorf("invalid twtxt file url: %v, %v", urls, err)
+	if !strings.HasPrefix(urls, "http") {
+		return nil, fmt.Errorf("invalid twtxt file url: %v", urls)
 	}
 
 	// Request the data
