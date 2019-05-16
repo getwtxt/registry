@@ -5,7 +5,7 @@
 It uses no third-party dependencies whatsoever, only the standard library.
 
 - [x] Maintain over 90% test coverage during development process
-- [x] Define types and create in-memory cache objects
+- [x] Define types and create objects
 - [x] Basic actions (Add, Delete users)
 - [x] Queries (Users, Mentions, Tags) with time-sorted output
 - [ ] twtxt.txt file scraping functions
