@@ -1,16 +1,14 @@
-# twtxt Registry Library [![Build Status](https://travis-ci.com/getwtxt/registry.svg?branch=master)](https://travis-ci.com/getwtxt/registry)
+# getwtxt/registry [![Build Status](https://travis-ci.com/getwtxt/registry.svg?branch=master)](https://travis-ci.com/getwtxt/registry)
+### twtxt Registry Library for Go
 
-This is a library that implements a custom-rolled twtxt registry. The
-specific needs of getwtxt are addressed here with respect to retrieval,
-storage, and querying of user data. Third-party dependencies are kept to
-a minimum. No need for `memcached`, etc.
+`getwtxt/registry` helps you implement a custom-rolled twtxt registry in Go.
+It uses no third-party dependencies whatsoever, only the standard library.
 
 - [x] Maintain over 90% test coverage during development process
 - [x] Define types and create in-memory cache objects
 - [x] Basic actions (Add, Delete users)
 - [x] Queries (Users, Mentions, Tags) with time-sorted output
 - [ ] twtxt.txt file scraping functions
-- [ ] Bridge in-memory cache to persistent storage
 - [ ] Refactor and optimize
 - [ ] Triple-check concurrency safety
 
