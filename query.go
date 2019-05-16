@@ -1,3 +1,5 @@
+// Package registry implements functions and types that assist
+// in the creation and management of a twtxt registry.
 package registry // import "github.com/getwtxt/registry"
 
 import (
@@ -57,7 +59,7 @@ func (index UserIndex) QueryInStatus(substr string) ([]string, error) {
 }
 
 // QueryLatestStatuses returns the 20 most recent statuses
-// in the registry sorted by time.
+// in the registry sorted by timestamp.
 func (index UserIndex) QueryLatestStatuses() ([]string, error) {
 	statusmap, err := index.GetStatuses()
 	if err != nil {
@@ -96,8 +98,8 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 	return statuses
 }
 
-// SortByTime returns a string slice of the query results
-// sorted by time.Time
+// SortByTime returns a string slice of the query results,
+// sorted by time.Time. The receiver is a TimeMapSlice.
 func (tm TimeMapSlice) SortByTime() []string {
 
 	var unionmap = NewTimeMap()
