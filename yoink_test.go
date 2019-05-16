@@ -61,6 +61,11 @@ var getTwtxtCases = []struct {
 		wantErr: true,
 		local:   false,
 	},
+	{
+		url:     "https://example.com/file.cgi",
+		wantErr: true,
+		local:   false,
+	},
 }
 
 // Test the function that yoinks the /twtxt.txt file

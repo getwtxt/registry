@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"path/filepath"
 )
 
 // GetTwtxt fetches the raw twtxt.txt data from the user's
@@ -14,6 +15,9 @@ func GetTwtxt(urls string) ([]byte, error) {
 	_, err := url.Parse(urls)
 	if err != nil {
 		return nil, fmt.Errorf("invalid twtxt.txt url: %v, %v", urls, err)
+	}
+	if filepath.Ext(urls) != ".txt" {
+		return nil, fmt.Errorf("not a path to a .txt file: %v", urls)
 	}
 
 	req, err := http.Get(urls)
