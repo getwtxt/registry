@@ -12,6 +12,7 @@ a minimum. No need for `memcached`, etc.
 - [ ] twtxt.txt file scraping functions
 - [ ] Bridge in-memory cache to persistent storage
 - [ ] Refactor and optimize
+- [ ] Triple-check concurrency safety
 
 ### Notes
 
