@@ -1,9 +1,14 @@
+// Package registry implements functions and types that assist
+// in the creation and management of a twtxt registry.
 package registry
 
 import (
+	"bufio"
 	"fmt"
 	"net/http"
+	"os"
 	"testing"
+	"time"
 )
 
 func constructTwtxt() []byte {
@@ -104,6 +109,85 @@ func Benchmark_GetTwtxt(b *testing.B) {
 			b.Run(tt.url, func(b *testing.B) {
 				GetTwtxt(tt.url)
 			})
+		}
+	}
+}
+
+var parseTwtxtCases = []struct {
+	name    string
+	data    []byte
+	wantErr bool
+}{
+	{
+		name:    "Constructed twtxt file",
+		data:    constructTwtxt(),
+		wantErr: false,
+	},
+	{
+		name:    "Incorrectly formatted date",
+		data:    []byte("foo_barrington\thttps://example3.com/twtxt.txt\t2019 April 23rd\tI love twtxt!!!11"),
+		wantErr: true,
+	},
+	{
+		name:    "No data",
+		data:    []byte{},
+		wantErr: true,
+	},
+	{
+		name:    "Random/garbage data",
+		wantErr: true,
+	},
+}
+
+// See if we can break ParseTwtxt or get it
+// to throw an unexpected error
+func Test_ParseTwtxt(t *testing.T) {
+	var buf = make([]byte, 256)
+	// read random data into case 4
+	rando, _ := os.Open("/dev/random")
+	reader := bufio.NewReader(rando)
+	reader.Read(buf)
+	parseTwtxtCases[3].data = buf
+
+	for _, tt := range parseTwtxtCases {
+		t.Run(tt.name, func(t *testing.T) {
+
+			timemap, errs := ParseTwtxt(tt.data)
+			if errs == nil && tt.wantErr {
+				t.Errorf("Expected error(s), received none.\n")
+			}
+
+			if !tt.wantErr {
+
+				for _, e := range errs {
+					if e != nil {
+						t.Errorf("Unexpected error: %v\n", e)
+					}
+				}
+
+				for k, v := range timemap {
+					if k == (time.Time{}) || v == "" {
+						t.Errorf("Empty status or empty timestamp: %v, %v\n", k, v)
+					}
+				}
+			}
+		})
+	}
+}
+
+func Benchmark_ParseTwtxt(b *testing.B) {
+	var buf = make([]byte, 256)
+	// read random data into case 4
+	rando, _ := os.Open("/dev/random")
+	reader := bufio.NewReader(rando)
+	reader.Read(buf)
+	parseTwtxtCases[3].data = buf
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		for _, tt := range parseTwtxtCases {
+			ParseTwtxt(tt.data)
 		}
 	}
 }
