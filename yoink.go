@@ -73,7 +73,7 @@ func ParseTwtxt(twtxt []byte) (TimeMap, []error) {
 	var erz []error
 
 	// Make sure we actually have something to parse
-	if twtxt == nil {
+	if len(twtxt) == 0 {
 		return nil, append(erz, fmt.Errorf("received no data"))
 	}
 

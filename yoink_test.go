@@ -37,39 +37,39 @@ func twtxtHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 var getTwtxtCases = []struct {
-	url     string
-	wantErr bool
-	local   bool
+	url       string
+	wantErr   bool
+	localOnly bool
 }{
 	{
-		url:     "http://localhost:8080/twtxt.txt",
-		wantErr: false,
-		local:   true,
+		url:       "http://localhost:8080/twtxt.txt",
+		wantErr:   false,
+		localOnly: true,
 	},
 	{
-		url:     "https://example3.com/twtxt.txt",
-		wantErr: true,
-		local:   false,
+		url:       "https://example33333333333.com/twtxt.txt",
+		wantErr:   true,
+		localOnly: false,
 	},
 	{
-		url:     "https://example3.com",
-		wantErr: true,
-		local:   false,
+		url:       "https://example333333333333.com",
+		wantErr:   true,
+		localOnly: false,
 	},
 	{
-		url:     "file://init_test.go",
-		wantErr: true,
-		local:   false,
+		url:       "file://init_test.go",
+		wantErr:   true,
+		localOnly: false,
 	},
 	{
-		url:     "/etc/passwd",
-		wantErr: true,
-		local:   false,
+		url:       "/etc/passwd",
+		wantErr:   true,
+		localOnly: false,
 	},
 	{
-		url:     "https://example.com/file.cgi",
-		wantErr: true,
-		local:   false,
+		url:       "https://example.com/file.cgi",
+		wantErr:   true,
+		localOnly: false,
 	},
 }
 
@@ -82,7 +82,7 @@ func Test_GetTwtxt(t *testing.T) {
 
 	for _, tt := range getTwtxtCases {
 		t.Run(tt.url, func(t *testing.T) {
-			if tt.local {
+			if tt.localOnly {
 				t.Skipf("Local-only test. Skipping ... \n")
 			}
 			out, err := GetTwtxt(tt.url)
@@ -114,28 +114,33 @@ func Benchmark_GetTwtxt(b *testing.B) {
 }
 
 var parseTwtxtCases = []struct {
-	name    string
-	data    []byte
-	wantErr bool
+	name      string
+	data      []byte
+	wantErr   bool
+	localOnly bool
 }{
 	{
-		name:    "Constructed twtxt file",
-		data:    constructTwtxt(),
-		wantErr: false,
+		name:      "Constructed twtxt file",
+		data:      constructTwtxt(),
+		wantErr:   false,
+		localOnly: false,
 	},
 	{
-		name:    "Incorrectly formatted date",
-		data:    []byte("foo_barrington\thttps://example3.com/twtxt.txt\t2019 April 23rd\tI love twtxt!!!11"),
-		wantErr: true,
+		name:      "Incorrectly formatted date",
+		data:      []byte("foo_barrington\thttps://example3.com/twtxt.txt\t2019 April 23rd\tI love twtxt!!!11"),
+		wantErr:   true,
+		localOnly: false,
 	},
 	{
-		name:    "No data",
-		data:    []byte{},
-		wantErr: true,
+		name:      "No data",
+		data:      []byte{},
+		wantErr:   true,
+		localOnly: false,
 	},
 	{
-		name:    "Random/garbage data",
-		wantErr: true,
+		name:      "Random/garbage data",
+		wantErr:   true,
+		localOnly: true,
 	},
 }
 
@@ -150,6 +155,9 @@ func Test_ParseTwtxt(t *testing.T) {
 	parseTwtxtCases[3].data = buf
 
 	for _, tt := range parseTwtxtCases {
+		if tt.localOnly {
+			t.Skipf("Local-only test: Skipping ... \n")
+		}
 		t.Run(tt.name, func(t *testing.T) {
 
 			timemap, errs := ParseTwtxt(tt.data)
