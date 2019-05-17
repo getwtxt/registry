@@ -3,44 +3,52 @@
 package registry // import "github.com/getwtxt/registry"
 
 import (
+	"bufio"
 	"net/http"
+	"os"
 	"reflect"
 	"testing"
 )
 
 var addUserCases = []struct {
+	name      string
 	nick      string
 	url       string
 	wantErr   bool
 	localOnly bool
 }{
 	{
+		name:      "Legitimate User (Local Only)",
 		nick:      "testuser1",
 		url:       "http://localhost:8080/twtxt.txt",
 		wantErr:   false,
 		localOnly: true,
 	},
 	{
+		name:      "Unreachable twtxt File",
 		nick:      "testuser2",
 		url:       "https://example555555555.com/twtxt.txt",
 		wantErr:   true,
 		localOnly: false,
 	},
 	{
-		nick:      "testuser1",
-		url:       "https://example444444444.com/twtxt.txt",
-		wantErr:   true,
-		localOnly: false,
-	},
-	{
+		name:      "Empty Query",
 		nick:      "",
 		url:       "",
 		wantErr:   true,
 		localOnly: false,
 	},
 	{
+		name:      "Invalid URL",
 		nick:      "foo",
 		url:       "foobarringtons",
+		wantErr:   true,
+		localOnly: false,
+	},
+	{
+		name:      "Garbage Data",
+		nick:      "",
+		url:       "",
 		wantErr:   true,
 		localOnly: false,
 	},
@@ -53,9 +61,16 @@ func Test_UserIndex_AddUser(t *testing.T) {
 		http.Handle("/twtxt.txt", http.HandlerFunc(twtxtHandler))
 		go http.ListenAndServe(":8080", nil)
 	}
+	var buf = make([]byte, 256)
+	// read random data into case 5
+	rando, _ := os.Open("/dev/random")
+	reader := bufio.NewReader(rando)
+	reader.Read(buf)
+	addUserCases[4].nick = string(buf)
+	addUserCases[4].url = string(buf)
 
 	for n, tt := range addUserCases {
-		t.Run(tt.nick, func(t *testing.T) {
+		t.Run(tt.name, func(t *testing.T) {
 			if tt.localOnly {
 				t.Skipf("Local-only test. Skipping ... ")
 			}
@@ -100,22 +115,32 @@ func Benchmark_UserIndex_AddUser(b *testing.B) {
 }
 
 var delUserCases = []struct {
+	name    string
 	url     string
 	wantErr bool
 }{
 	{
+		name:    "Valid User",
 		url:     "https://example.com/twtxt.txt",
 		wantErr: false,
 	},
 	{
+		name:    "Valid User",
 		url:     "https://example3.com/twtxt.txt",
 		wantErr: false,
 	},
 	{
+		name:    "Already Deleted User",
 		url:     "https://example3.com/twtxt.txt",
 		wantErr: true,
 	},
 	{
+		name:    "Empty Query",
+		url:     "",
+		wantErr: true,
+	},
+	{
+		name:    "Garbage Data",
 		url:     "",
 		wantErr: true,
 	},
@@ -124,9 +149,15 @@ var delUserCases = []struct {
 // Tests if we can successfully delete a user from the index
 func Test_UserIndex_DelUser(t *testing.T) {
 	index := initTestEnv()
+	var buf = make([]byte, 256)
+	// read random data into case 5
+	rando, _ := os.Open("/dev/random")
+	reader := bufio.NewReader(rando)
+	reader.Read(buf)
+	delUserCases[4].url = string(buf)
 
 	for n, tt := range delUserCases {
-		t.Run(tt.url, func(t *testing.T) {
+		t.Run(tt.name, func(t *testing.T) {
 
 			err := index.DelUser(tt.url)
 			if !reflect.ValueOf(index.Reg[tt.url]).IsNil() {
@@ -170,22 +201,32 @@ func Benchmark_UserIndex_DelUser(b *testing.B) {
 }
 
 var getUserStatusCases = []struct {
+	name    string
 	url     string
 	wantErr bool
 }{
 	{
+		name:    "Valid User",
 		url:     "https://example.com/twtxt.txt",
 		wantErr: false,
 	},
 	{
+		name:    "Valid User",
 		url:     "https://example3.com/twtxt.txt",
 		wantErr: false,
 	},
 	{
+		name:    "Nonexistent User",
 		url:     "https://doesn't.exist/twtxt.txt",
 		wantErr: true,
 	},
 	{
+		name:    "Empty Query",
+		url:     "",
+		wantErr: true,
+	},
+	{
+		name:    "Garbage Data",
 		url:     "",
 		wantErr: true,
 	},
@@ -194,9 +235,15 @@ var getUserStatusCases = []struct {
 // Checks if we can retrieve a single user's statuses
 func Test_UserIndex_GetUserStatuses(t *testing.T) {
 	index := initTestEnv()
+	var buf = make([]byte, 256)
+	// read random data into case 5
+	rando, _ := os.Open("/dev/random")
+	reader := bufio.NewReader(rando)
+	reader.Read(buf)
+	getUserStatusCases[4].url = string(buf)
 
 	for n, tt := range getUserStatusCases {
-		t.Run(tt.url, func(t *testing.T) {
+		t.Run(tt.name, func(t *testing.T) {
 
 			statuses, err := index.GetUserStatuses(tt.url)
 
