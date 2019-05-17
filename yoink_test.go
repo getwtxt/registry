@@ -15,7 +15,7 @@ func constructTwtxt() []byte {
 	index := initTestEnv()
 	var resp []byte
 	// iterates through each mock user's mock statuses
-	for _, v := range index {
+	for _, v := range index.Reg {
 		for _, e := range v.Status {
 			resp = append(resp, []byte(fmt.Sprintf(e+"\n"))...)
 		}

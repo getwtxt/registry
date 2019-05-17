@@ -181,7 +181,7 @@ func Test_Data_FindInStatus(t *testing.T) {
 	index := initTestEnv()
 	data := make([]*Data, 0)
 
-	for _, v := range index {
+	for _, v := range index.Reg {
 		data = append(data, v)
 	}
 
@@ -202,7 +202,7 @@ func Benchmark_Data_FindInStatus(b *testing.B) {
 	index := initTestEnv()
 	data := make([]*Data, 0)
 
-	for _, v := range index {
+	for _, v := range index.Reg {
 		data = append(data, v)
 	}
 	b.ResetTimer()

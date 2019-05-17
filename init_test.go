@@ -15,7 +15,7 @@ func quickErr(err error) {
 }
 
 // Sets up mock users and statuses
-func initTestEnv() UserIndex {
+func initTestEnv() *Index {
 	hush, err := os.Open("/dev/null")
 	quickErr(err)
 	log.SetOutput(hush)
@@ -74,7 +74,7 @@ func initTestEnv() UserIndex {
 		data.Nick = e.nick
 		data.APIdate = e.apidate
 		data.Status = e.status
-		index[e.url] = data
+		index.Reg[e.url] = data
 	}
 
 	return index

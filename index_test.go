@@ -69,14 +69,14 @@ func Test_UserIndex_AddUser(t *testing.T) {
 				}
 
 				// make sure we have *something* in the index
-				if reflect.ValueOf(index[tt.url]).IsNil() {
+				if reflect.ValueOf(index.Reg[tt.url]).IsNil() {
 					t.Errorf("Failed to add user %v index.\n", tt.url)
 				}
 
 				// see if the nick in the index is the same
 				// as the test case. verifies the URL and the nick
 				// since the URL is used as the key
-				data := index[tt.url]
+				data := index.Reg[tt.url]
 				if data.Nick != tt.nick {
 					t.Errorf("Incorrect user data added to index for user %v.\n", tt.url)
 				}
@@ -94,7 +94,7 @@ func Benchmark_UserIndex_AddUser(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		for _, tt := range addUserCases {
 			index.AddUser(tt.nick, tt.url)
-			index[tt.url] = &Data{}
+			index.Reg[tt.url] = &Data{}
 		}
 	}
 }
@@ -129,7 +129,7 @@ func Test_UserIndex_DelUser(t *testing.T) {
 		t.Run(tt.url, func(t *testing.T) {
 
 			err := index.DelUser(tt.url)
-			if !reflect.ValueOf(index[tt.url]).IsNil() {
+			if !reflect.ValueOf(index.Reg[tt.url]).IsNil() {
 				t.Errorf("Failed to delete user %v from index.\n", tt.url)
 			}
 			if tt.wantErr && err == nil {
@@ -145,17 +145,17 @@ func Benchmark_UserIndex_DelUser(b *testing.B) {
 	index := initTestEnv()
 
 	data1 := &Data{
-		Nick:    index[delUserCases[0].url].Nick,
-		Date:    index[delUserCases[0].url].Date,
-		APIdate: index[delUserCases[0].url].APIdate,
-		Status:  index[delUserCases[0].url].Status,
+		Nick:    index.Reg[delUserCases[0].url].Nick,
+		Date:    index.Reg[delUserCases[0].url].Date,
+		APIdate: index.Reg[delUserCases[0].url].APIdate,
+		Status:  index.Reg[delUserCases[0].url].Status,
 	}
 
 	data2 := &Data{
-		Nick:    index[delUserCases[1].url].Nick,
-		Date:    index[delUserCases[1].url].Date,
-		APIdate: index[delUserCases[1].url].APIdate,
-		Status:  index[delUserCases[1].url].Status,
+		Nick:    index.Reg[delUserCases[1].url].Nick,
+		Date:    index.Reg[delUserCases[1].url].Date,
+		APIdate: index.Reg[delUserCases[1].url].APIdate,
+		Status:  index.Reg[delUserCases[1].url].Status,
 	}
 	b.ResetTimer()
 
@@ -164,8 +164,8 @@ func Benchmark_UserIndex_DelUser(b *testing.B) {
 			index.DelUser(tt.url)
 		}
 
-		index[delUserCases[0].url] = data1
-		index[delUserCases[1].url] = data2
+		index.Reg[delUserCases[0].url] = data1
+		index.Reg[delUserCases[1].url] = data2
 	}
 }
 
@@ -206,7 +206,7 @@ func Test_UserIndex_GetUserStatuses(t *testing.T) {
 				}
 				// see if the function returns the same data
 				// that we already have
-				data := index[tt.url]
+				data := index.Reg[tt.url]
 				if !reflect.DeepEqual(data.Status, statuses) {
 					t.Errorf("Incorrect data retrieved as statuses for user %v.\n", tt.url)
 				}
@@ -242,7 +242,7 @@ func Test_UserIndex_GetStatuses(t *testing.T) {
 		// Now do the same query manually to see
 		// if we get the same result
 		unionmap := NewTimeMap()
-		for _, v := range index {
+		for _, v := range index.Reg {
 			for i, e := range v.Status {
 				unionmap[i] = e
 			}

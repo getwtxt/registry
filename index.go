@@ -11,8 +11,7 @@ import (
 
 // AddUser inserts a new user into the index. The *Data struct
 // contains the nickname and the time the user was added.
-// TODO: Tie this to GetTwtxt / ParseTwtxt
-func (index UserIndex) AddUser(nick string, urls string) error {
+func (index *Index) AddUser(nick string, urls string) error {
 
 	// Check that we have an initialized index.
 	if index == nil {
@@ -28,13 +27,13 @@ func (index UserIndex) AddUser(nick string, urls string) error {
 
 	// Use the double-return-value property of map lookups
 	// to check if a user already exists in the index.
-	imutex.RLock()
-	if _, ok := index[urls]; ok {
-		imutex.RUnlock()
+	index.Mu.RLock()
+	if _, ok := index.Reg[urls]; ok {
+		index.Mu.RUnlock()
 		log.Printf("User %v can't be added - already exists.\n", urls)
 		return fmt.Errorf("user %v already exists", urls)
 	}
-	imutex.RUnlock()
+	index.Mu.RUnlock()
 
 	// Get the time as both a standard time.Time and as
 	// an RFC3339-formatted timestamp. This will be used
@@ -62,18 +61,18 @@ func (index UserIndex) AddUser(nick string, urls string) error {
 
 	// Acquire a write lock and load the user data into
 	// our index.
-	imutex.Lock()
-	index[urls] = &Data{Nick: nick, Date: thetime, APIdate: rfc3339date, Status: parsed}
-	imutex.Unlock()
+	index.Mu.Lock()
+	index.Reg[urls] = &Data{Nick: nick, Date: thetime, APIdate: rfc3339date, Status: parsed}
+	index.Mu.Unlock()
 
 	return nil
 }
 
 // DelUser removes a user from the index completely.
-func (index UserIndex) DelUser(urls string) error {
+func (index *Index) DelUser(urls string) error {
 
 	// Check that we have an initialized index.
-	if index == nil || len(index) == 0 {
+	if index == nil {
 		return fmt.Errorf("can't delete user from empty index")
 	}
 
@@ -87,27 +86,27 @@ func (index UserIndex) DelUser(urls string) error {
 	// Use the double-return-value property of maps
 	// to check if the user exists in the index. If
 	// they don't, we can't remove them.
-	imutex.RLock()
-	if _, ok := index[urls]; !ok {
-		imutex.RUnlock()
+	index.Mu.RLock()
+	if _, ok := index.Reg[urls]; !ok {
+		index.Mu.RUnlock()
 		return fmt.Errorf("can't delete user %v, user doesn't exist", urls)
 	}
-	imutex.RUnlock()
+	index.Mu.RUnlock()
 
 	// Acquire a write lock and delete the user from
 	// the index.
-	imutex.Lock()
-	delete(index, urls)
-	imutex.Unlock()
+	index.Mu.Lock()
+	delete(index.Reg, urls)
+	index.Mu.Unlock()
 
 	return nil
 }
 
 // GetUserStatuses returns a TimeMap containing a user's statuses
-func (index UserIndex) GetUserStatuses(urls string) (TimeMap, error) {
+func (index *Index) GetUserStatuses(urls string) (TimeMap, error) {
 
 	// Check that we have an initialized index.
-	if index == nil || len(index) == 0 {
+	if index == nil {
 		return nil, fmt.Errorf("can't get statuses from an empty index")
 	}
 
@@ -121,25 +120,25 @@ func (index UserIndex) GetUserStatuses(urls string) (TimeMap, error) {
 	// Use the double-return-value property of maps
 	// to check if the user is in the index. If they
 	// aren't, we can't return their statuses.
-	imutex.RLock()
-	if _, ok := index[urls]; !ok {
-		imutex.RUnlock()
+	index.Mu.RLock()
+	if _, ok := index.Reg[urls]; !ok {
+		index.Mu.RUnlock()
 		return nil, fmt.Errorf("can't retrieve statuses of nonexistent user")
 	}
 
 	// Pull the user's statuses from the index.
-	status := index[urls].Status
-	imutex.RUnlock()
+	status := index.Reg[urls].Status
+	index.Mu.RUnlock()
 
 	return status, nil
 }
 
 // GetStatuses returns a TimeMap containing all statuses
 // in the index.
-func (index UserIndex) GetStatuses() (TimeMap, error) {
+func (index *Index) GetStatuses() (TimeMap, error) {
 
 	// Check that we have an initialized index.
-	if index == nil || len(index) == 0 {
+	if index == nil {
 		return nil, fmt.Errorf("can't get statuses from an empty index")
 	}
 
@@ -151,13 +150,13 @@ func (index UserIndex) GetStatuses() (TimeMap, error) {
 	// our aggregate TimeMap. This needs to
 	// be refactored badly. as it's O(n^2)
 	// and probably doesn't need to be.
-	imutex.RLock()
-	for _, v := range index {
+	index.Mu.RLock()
+	for _, v := range index.Reg {
 		for a, b := range v.Status {
 			statuses[a] = b
 		}
 	}
-	imutex.RUnlock()
+	index.Mu.RUnlock()
 
 	return statuses, nil
 }

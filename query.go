@@ -12,9 +12,9 @@ import (
 // term provided as an argument. Entries are returned sorted by the date
 // they were added to the index. If the argument provided is blank, return
 // all users.
-func (index UserIndex) QueryUser(term string) ([]string, error) {
+func (index *Index) QueryUser(term string) ([]string, error) {
 
-	if index == nil || len(index) == 0 {
+	if index == nil {
 		return nil, fmt.Errorf("can't query empty index for user")
 	}
 
@@ -22,14 +22,14 @@ func (index UserIndex) QueryUser(term string) ([]string, error) {
 	keys := make(TimeSlice, 0)
 	var users []string
 
-	imutex.RLock()
-	for k, v := range index {
+	index.Mu.RLock()
+	for k, v := range index.Reg {
 		if strings.Contains(v.Nick, term) || strings.Contains(k, term) {
 			timekey[v.Date] = v.Nick + "\t" + k + "\t" + string(v.APIdate) + "\n"
 			keys = append(keys, v.Date)
 		}
 	}
-	imutex.RUnlock()
+	index.Mu.RUnlock()
 
 	sort.Sort(keys)
 	for _, e := range keys {
@@ -41,29 +41,29 @@ func (index UserIndex) QueryUser(term string) ([]string, error) {
 
 // QueryInStatus returns all the known statuses that
 // contain the provided substring (tag, mention URL, etc).
-func (index UserIndex) QueryInStatus(substr string) ([]string, error) {
+func (index *Index) QueryInStatus(substr string) ([]string, error) {
 
 	if substr == "" {
 		return nil, fmt.Errorf("cannot query for empty tag")
-	} else if len(index) == 0 || index == nil {
+	} else if index == nil {
 		return nil, fmt.Errorf("can't query statuses of empty index")
 	}
 
 	statusmap := NewTimeMapSlice()
 
-	imutex.RLock()
-	for _, v := range index {
+	index.Mu.RLock()
+	for _, v := range index.Reg {
 		statusmap = append(statusmap, v.FindInStatus(substr))
 	}
-	imutex.RUnlock()
+	index.Mu.RUnlock()
 
 	return statusmap.SortByTime(), nil
 }
 
 // QueryLatestStatuses returns the 20 most recent statuses
 // in the registry sorted by timestamp.
-func (index UserIndex) QueryLatestStatuses() ([]string, error) {
-	if index == nil || len(index) == 0 {
+func (index *Index) QueryLatestStatuses() ([]string, error) {
+	if index == nil {
 		return nil, fmt.Errorf("can't get latest statuses from empty index")
 	}
 
@@ -91,6 +91,7 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 
 	statuses := NewTimeMap()
 
+	userdata.Mu.RLock()
 	for k, e := range userdata.Status {
 		parts := strings.Split(e, "\t")
 		statusslice := strings.Split(parts[3], " ")
@@ -103,6 +104,7 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 			}
 		}
 	}
+	userdata.Mu.RUnlock()
 
 	return statuses
 }

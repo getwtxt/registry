@@ -7,23 +7,25 @@ import (
 	"time"
 )
 
-// UserIndex provides an index of users by URL constructed
-// from a map[string]*Data
-type UserIndex map[string]*Data
-
-// Mutex to control access to the User Index.
-var imutex = sync.RWMutex{}
-
 // Data on each user. Data.Nick is the specified nickname.
 // Data.Date is the time.Time of the user's submission to
 // the registry. Data.APIdate is the RFC3339-formatted
 // date/time of the user's submission. Data.Status is a
 // TimeMap containing the user's statuses.
 type Data struct {
+	Mu      sync.RWMutex
 	Nick    string
 	Date    time.Time
 	APIdate []byte
 	Status  TimeMap
+}
+
+// Index provides an index of users constructed from a
+// map[string]*Data. A sync.RWMutex is included to restrict
+// concurrent access to the map.
+type Index struct {
+	Mu  sync.RWMutex
+	Reg map[string]*Data
 }
 
 // TimeMap holds extracted and processed user data as a
@@ -42,9 +44,13 @@ type TimeMapSlice []TimeMap
 // a TimeMap by timestamp.
 type TimeSlice []time.Time
 
-// NewUserIndex returns an initialized UserIndex
-func NewUserIndex() UserIndex {
-	return make(UserIndex)
+// NewUserIndex returns an initialized Index and its
+// associated sync.RWMutex
+func NewUserIndex() *Index {
+	return &Index{
+		Mu:  sync.RWMutex{},
+		Reg: make(map[string]*Data),
+	}
 }
 
 // NewTimeMap returns an initialized TimeMap.
