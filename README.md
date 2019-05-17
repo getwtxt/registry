@@ -13,9 +13,9 @@ this warning or the below task list once it's at a release stage.
 - [x] twtxt.txt file scraping functions
 - [x] Find and squash bugs
 - [x] Refactor and optimize    `<---HERE`
--  * Make sure I didn't leave functionality out
--  * Triple-check concurrency safety
--  * Achieve 90% test coverage
+    * Make sure I didn't leave functionality out
+    * Triple-check concurrency safety
+    * Achieve 90% test coverage
 
 ### Notes
 
