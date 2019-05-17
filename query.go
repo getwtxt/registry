@@ -63,9 +63,10 @@ func (index *Index) QueryInStatus(substr string) ([]string, error) {
 	return statusmap.SortByTime(), nil
 }
 
-// QueryLatestStatuses returns the 20 most recent statuses
-// in the registry sorted by timestamp.
-func (index *Index) QueryLatestStatuses() ([]string, error) {
+// QueryAllStatuses returns all statuses in the registry,
+// sorted by timestamp. Output is a slice of bytes, ready
+// to send to the requester.
+func (index *Index) QueryAllStatuses() ([]string, error) {
 	if index == nil {
 		return nil, fmt.Errorf("can't get latest statuses from empty index")
 	}
@@ -79,16 +80,15 @@ func (index *Index) QueryLatestStatuses() ([]string, error) {
 	statusmaps = append(statusmaps, statusmap)
 	sorted := statusmaps.SortByTime()
 
-	if len(sorted) < 20 {
-		return sorted, nil
-	}
-	return sorted[:19], nil
+	return sorted, nil
 }
 
 // FindInStatus takes a user's statuses and looks for a given substring.
-// Returns the statuses with the substring as a []string.
+// Returns the statuses with the substring as a TimeMap.
 func (userdata *Data) FindInStatus(word string) TimeMap {
 	if userdata == nil {
+		return nil
+	} else if len(word) > 140 {
 		return nil
 	}
 
@@ -96,20 +96,15 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 
 	userdata.Mu.RLock()
 	for k, e := range userdata.Status {
-		if _, ok := userdata.Status[k]; ok {
-
-			parts := strings.Split(e, "\t")
-			statusslice := strings.Split(parts[3], " ")
-
-			for _, v := range statusslice {
-				if strings.Contains(v, word) {
-
-					statuses[k] = e
-					break
-				}
-			}
-
+		if _, ok := userdata.Status[k]; !ok {
+			continue
 		}
+
+		parts := strings.Split(e, "\t")
+		if strings.Contains(parts[3], word) {
+			statuses[k] = e
+		}
+
 	}
 	userdata.Mu.RUnlock()
 
@@ -117,7 +112,8 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 }
 
 // SortByTime returns a string slice of the query results,
-// sorted by time.Time. The receiver is a TimeMapSlice.
+// sorted by time.Time. The receiver is a TimeMapSlice. the
+// results are returned as a []byte.
 func (tm TimeMapSlice) SortByTime() []string {
 	if tm == nil {
 		return nil

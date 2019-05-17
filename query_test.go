@@ -3,6 +3,8 @@
 package registry
 
 import (
+	"bufio"
+	"os"
 	"strings"
 	"testing"
 )
@@ -69,42 +71,56 @@ func Benchmark_UserIndex_QueryUser(b *testing.B) {
 }
 
 var queryInStatusCases = []struct {
+	name    string
 	substr  string
 	wantNil bool
 	wantErr bool
 }{
 	{
+		name:    "Tag in Status",
 		substr:  "twtxt",
 		wantNil: false,
 		wantErr: false,
 	},
 	{
+		name:    "Valid URL",
 		substr:  "https://example.com/twtxt.txt",
 		wantNil: false,
 		wantErr: false,
 	},
 	{
-		substr:  "project",
+		name:    "Multiple Words in Status",
+		substr:  "next programming",
 		wantNil: false,
 		wantErr: false,
 	},
 	{
-		substr:  "https://example3.com/twtxt.txt",
-		wantNil: false,
+		name:    "Multiple Words, Not in Status",
+		substr:  "explosive bananas from antarctica",
+		wantNil: true,
 		wantErr: false,
 	},
 	{
+		name:    "Empty Query",
 		substr:  "",
 		wantNil: true,
 		wantErr: true,
 	},
 	{
+		name:    "Nonsense",
 		substr:  "ahfiurrenkhfkajdhfao",
 		wantNil: true,
 		wantErr: false,
 	},
 	{
+		name:    "Invalid URL",
 		substr:  "https://doesnt.exist/twtxt.txt",
+		wantNil: true,
+		wantErr: false,
+	},
+	{
+		name:    "Garbage Data",
+		substr:  "will be replaced with garbage data",
 		wantNil: true,
 		wantErr: false,
 	},
@@ -115,10 +131,16 @@ var queryInStatusCases = []struct {
 // stored with each status.
 func Test_UserIndex_QueryInStatus(t *testing.T) {
 	index := initTestEnv()
+	var buf = make([]byte, 256)
+	// read random data into case 8
+	rando, _ := os.Open("/dev/random")
+	reader := bufio.NewReader(rando)
+	reader.Read(buf)
+	queryInStatusCases[7].substr = string(buf)
 
 	for _, tt := range queryInStatusCases {
 
-		t.Run(tt.substr, func(t *testing.T) {
+		t.Run(tt.name, func(t *testing.T) {
 
 			out, err := index.QueryInStatus(tt.substr)
 			if err != nil && !tt.wantErr {
@@ -134,7 +156,7 @@ func Test_UserIndex_QueryInStatus(t *testing.T) {
 			}
 
 			for _, e := range out {
-				split := strings.Split(e, "\t")
+				split := strings.Split(string(e), "\t")
 
 				if !strings.Contains(split[3], tt.substr) {
 					t.Errorf("Status without substring returned\n")
@@ -160,7 +182,7 @@ func Benchmark_UserIndex_QueryInStatus(b *testing.B) {
 func Test_QueryLatestStatuses(t *testing.T) {
 	index := initTestEnv()
 	t.Run("Latest Statuses", func(t *testing.T) {
-		out, err := index.QueryLatestStatuses()
+		out, err := index.QueryAllStatuses()
 		if out == nil || len(out) > 20 || err != nil {
 			t.Errorf("Got no statuses, or more than 20: %v, %v\n", len(out), err)
 		}
@@ -170,7 +192,7 @@ func Benchmark_QueryLatestStatuses(b *testing.B) {
 	index := initTestEnv()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		index.QueryLatestStatuses()
+		index.QueryAllStatuses()
 	}
 }
 
