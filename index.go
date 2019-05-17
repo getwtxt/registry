@@ -16,11 +16,11 @@ func (index *Index) AddUser(nick string, urls string) error {
 	// Check that we have an initialized index.
 	if index == nil {
 		return fmt.Errorf("can't add user to uninitialized index")
-	}
 
-	// Check that the request is valid.
-	if nick == "" || urls == "" {
+	} else if nick == "" || urls == "" {
+		// Check that the request is valid.
 		return fmt.Errorf("both URL and Nick must be specified")
+
 	} else if !strings.HasPrefix(urls, "http") {
 		return fmt.Errorf("invalid URL: %v", urls)
 	}
@@ -50,6 +50,7 @@ func (index *Index) AddUser(nick string, urls string) error {
 	if err != nil {
 		return fmt.Errorf("error retrieving twtxt status file: %v", err)
 	}
+
 	parsed, errz := ParseTwtxt(rawdata)
 	if err != nil {
 		out := "error(s) parsing twtxt status file: "
@@ -74,12 +75,13 @@ func (index *Index) DelUser(urls string) error {
 	// Check that we have an initialized index.
 	if index == nil {
 		return fmt.Errorf("can't delete user from empty index")
-	}
 
-	// Check that the request is valid.
-	if urls == "" {
+	} else if urls == "" {
+		// Check that the request is valid.
 		return fmt.Errorf("can't delete blank user")
+
 	} else if !strings.HasPrefix(urls, "http") {
+		// Check that we were provided a URL
 		return fmt.Errorf("invalid URL: %v", urls)
 	}
 
@@ -108,12 +110,13 @@ func (index *Index) GetUserStatuses(urls string) (TimeMap, error) {
 	// Check that we have an initialized index.
 	if index == nil {
 		return nil, fmt.Errorf("can't get statuses from an empty index")
-	}
 
-	// Check that the request is valid.
-	if urls == "" {
+	} else if urls == "" {
+		// Check that the request is valid.
 		return nil, fmt.Errorf("can't retrieve statuses of blank user")
+
 	} else if !strings.HasPrefix(urls, "http") {
+		// Check that we were provided a URL
 		return nil, fmt.Errorf("invalid URL: %v", urls)
 	}
 
@@ -150,6 +153,10 @@ func (index *Index) GetStatuses() (TimeMap, error) {
 	// our aggregate TimeMap.
 	index.Mu.RLock()
 	for _, v := range index.Reg {
+		if v.Status == nil || len(v.Status) == 0 {
+			// Skip a user's statuses if the map is uninitialized or zero length
+			continue
+		}
 		for a, b := range v.Status {
 			if _, ok := v.Status[a]; ok {
 				statuses[a] = b
