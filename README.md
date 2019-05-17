@@ -1,8 +1,11 @@
 # getwtxt/registry [![Build Status](https://travis-ci.com/getwtxt/registry.svg?branch=master)](https://travis-ci.com/getwtxt/registry)
 ### twtxt Registry Library for Go
 
-`getwtxt/registry` helps you implement a custom-rolled twtxt registry in Go.
+`getwtxt/registry` helps you implement twtxt registries in Go.
 It uses no third-party dependencies whatsoever, only the standard library.
+
+This library is still in early development. The readme will no longer have
+this warning or the below task list once it's at a release stage.
 
 - [x] Define types and create objects
 - [x] Basic actions (Add, Delete users)
