@@ -8,7 +8,7 @@ It uses no third-party dependencies whatsoever, only the standard library.
 - [x] Basic actions (Add, Delete users)
 - [x] Queries (Users, Mentions, Tags) with time-sorted output
 - [x] twtxt.txt file scraping functions
-- [x] Find and squash bugs    [<---HERE]
+- [x] Find and squash bugs    `<---HERE`
 - [ ] Refactor and optimize
 - [ ] Triple-check concurrency safety
 - [ ] Achieve 90% test coverage
