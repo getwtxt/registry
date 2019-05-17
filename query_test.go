@@ -10,23 +10,28 @@ import (
 )
 
 var queryUserCases = []struct {
+	name    string
 	term    string
 	wantErr bool
 }{
 	{
+		name:    "Valid User",
 		term:    "foo",
 		wantErr: false,
 	},
 	{
-		term:    "example",
-		wantErr: false,
-	},
-	{
+		name:    "Empty Query",
 		term:    "",
 		wantErr: false,
 	},
 	{
+		name:    "Nonexistent User",
 		term:    "doesntexist",
+		wantErr: true,
+	},
+	{
+		name:    "Garbage Data",
+		term:    "will be replaced with garbage data",
 		wantErr: true,
 	},
 }
@@ -35,10 +40,16 @@ var queryUserCases = []struct {
 // match the provided substring.
 func Test_UserIndex_QueryUser(t *testing.T) {
 	index := initTestEnv()
+	var buf = make([]byte, 256)
+	// read random data into case 8
+	rando, _ := os.Open("/dev/random")
+	reader := bufio.NewReader(rando)
+	reader.Read(buf)
+	queryUserCases[3].term = string(buf)
 
 	for n, tt := range queryUserCases {
 
-		t.Run(tt.term, func(t *testing.T) {
+		t.Run(tt.name, func(t *testing.T) {
 			out, err := index.QueryUser(tt.term)
 
 			if out == nil && err != nil && !tt.wantErr {
@@ -201,21 +212,28 @@ func Benchmark_QueryLatestStatuses(b *testing.B) {
 // stored with each status.
 func Test_Data_FindInStatus(t *testing.T) {
 	index := initTestEnv()
+	var buf = make([]byte, 256)
+	// read random data into case 8
+	rando, _ := os.Open("/dev/random")
+	reader := bufio.NewReader(rando)
+	reader.Read(buf)
+	queryInStatusCases[7].substr = string(buf)
+
 	data := make([]*Data, 0)
 
 	for _, v := range index.Reg {
 		data = append(data, v)
 	}
 
-	i := 0
-	for _, tt := range data {
-		t.Run(tt.Nick, func(t *testing.T) {
+	for _, tt := range queryInStatusCases {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, e := range data {
 
-			tag := tt.FindInStatus(queryInStatusCases[i].substr)
-			if tag == nil {
-				t.Errorf("Got nil tag\n")
+				tag := e.FindInStatus(tt.substr)
+				if tag == nil && !tt.wantNil {
+					t.Errorf("Got nil tag\n")
+				}
 			}
-			i++
 		})
 	}
 
