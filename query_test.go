@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 var queryUserCases = []struct {
@@ -256,9 +257,61 @@ func Benchmark_Data_FindInStatus(b *testing.B) {
 	}
 }
 
-//func Test_TimeMapSlice_SortByTime(t *testing.T) {
+func Test_TimeMapSlice_SortByTime(t *testing.T) {
+	index := initTestEnv()
 
-//}
-//func Benchmark_TimeMapSlice_SortByTime(b *testing.B) {
+	statusmap, err := index.GetStatuses()
+	if err != nil {
+		t.Errorf("Failed to finish test initialization: %v\n", err)
+	}
 
-//}
+	statusmaps := NewTimeMapSlice()
+	statusmaps = append(statusmaps, statusmap)
+
+	t.Run("Sort By Time", func(t *testing.T) {
+		sorted := statusmaps.SortByTime()
+		split := strings.Split(sorted[0], "\t")
+		firsttime, _ := time.Parse("RFC3339", split[2])
+
+		for i := range sorted {
+			if i < len(sorted)-1 {
+
+				nextsplit := strings.Split(sorted[i+1], "\t")
+				nexttime, _ := time.Parse("RFC3339", nextsplit[2])
+
+				if firsttime.Before(nexttime) {
+					t.Errorf("Timestamps out of order: %v\n", sorted)
+				}
+
+				firsttime = nexttime
+			}
+		}
+	})
+}
+
+// Benchmarking a sort of 1000000 statuses by timestamp.
+// Right now it's at roughly 2000ns per 2 statuses.
+// Set sortMultiplier to be the number of desired
+// statuses divided by four.
+func Benchmark_TimeMapSlice_SortByTime(b *testing.B) {
+	sortMultiplier := 250000
+	index := initTestEnv()
+
+	statusmap, err := index.GetStatuses()
+	if err != nil {
+		b.Errorf("Failed to finish benchmark initialization: %v\n", err)
+	}
+
+	// Constructed index has four statuses. This
+	// makes a TimeMapSlice of 1000000 statuses.
+	statusmaps := NewTimeMapSlice()
+	for i := 0; i < sortMultiplier; i++ {
+		statusmaps = append(statusmaps, statusmap)
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		statusmaps.SortByTime()
+	}
+}
