@@ -42,7 +42,6 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 // QueryInStatus returns all the known statuses that
 // contain the provided substring (tag, mention URL, etc).
 func (index *Index) QueryInStatus(substr string) ([]string, error) {
-
 	if substr == "" {
 		return nil, fmt.Errorf("cannot query for empty tag")
 	} else if index == nil {
@@ -93,15 +92,19 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 
 	userdata.Mu.RLock()
 	for k, e := range userdata.Status {
-		parts := strings.Split(e, "\t")
-		statusslice := strings.Split(parts[3], " ")
+		if _, ok := userdata.Status[k]; ok {
 
-		for _, v := range statusslice {
+			parts := strings.Split(e, "\t")
+			statusslice := strings.Split(parts[3], " ")
 
-			if strings.Contains(v, word) {
-				statuses[k] = e
-				break
+			for _, v := range statusslice {
+				if strings.Contains(v, word) {
+
+					statuses[k] = e
+					break
+				}
 			}
+
 		}
 	}
 	userdata.Mu.RUnlock()
@@ -122,7 +125,9 @@ func (tm TimeMapSlice) SortByTime() []string {
 
 	for _, e := range tm {
 		for k, v := range e {
-			unionmap[k] = v
+			if _, ok := e[k]; ok {
+				unionmap[k] = v
+			}
 		}
 	}
 

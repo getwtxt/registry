@@ -147,13 +147,13 @@ func (index *Index) GetStatuses() (TimeMap, error) {
 	statuses := NewTimeMap()
 
 	// For each user, assign each status to
-	// our aggregate TimeMap. This needs to
-	// be refactored badly. as it's O(n^2)
-	// and probably doesn't need to be.
+	// our aggregate TimeMap.
 	index.Mu.RLock()
 	for _, v := range index.Reg {
 		for a, b := range v.Status {
-			statuses[a] = b
+			if _, ok := v.Status[a]; ok {
+				statuses[a] = b
+			}
 		}
 	}
 	index.Mu.RUnlock()
