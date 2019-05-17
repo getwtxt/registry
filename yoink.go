@@ -79,10 +79,10 @@ func ParseTwtxt(twtxt []byte) (TimeMap, []error) {
 	reader := bytes.NewReader(twtxt)
 	scanner := bufio.NewScanner(reader)
 	timemap := NewTimeMap()
-	thetime := time.Time{}
 
 	// Scan the data by linebreak
 	for scanner.Scan() {
+		thetime := time.Time{}
 
 		// Split the twtxt file into columns by tabs
 		columns := strings.Split(scanner.Text(), "\t")

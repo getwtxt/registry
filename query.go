@@ -73,7 +73,7 @@ func (index *Index) QueryAllStatuses() ([]string, error) {
 
 	statusmap, err := index.GetStatuses()
 	if err != nil {
-		return nil, fmt.Errorf("%v", err)
+		return nil, err
 	}
 
 	statusmaps := NewTimeMapSlice()
