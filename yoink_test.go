@@ -93,12 +93,15 @@ func Test_GetTwtxt(t *testing.T) {
 	// read random data into case 4
 	rando, _ := os.Open("/dev/random")
 	reader := bufio.NewReader(rando)
-	reader.Read(buf)
+	n, err := reader.Read(buf)
+	if err != nil || n == 0 {
+		t.Errorf("Couldn't set up test: %v\n", err)
+	}
 	getTwtxtCases[6].url = string(buf)
 
 	if !getTwtxtCases[0].localOnly {
 		http.Handle("/twtxt.txt", http.HandlerFunc(twtxtHandler))
-		go http.ListenAndServe(":8080", nil)
+		go fmt.Println(http.ListenAndServe(":8080", nil))
 	}
 
 	for _, tt := range getTwtxtCases {
@@ -127,7 +130,10 @@ func Benchmark_GetTwtxt(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range getTwtxtCases {
-			GetTwtxt(tt.url)
+			_, err := GetTwtxt(tt.url)
+			if err != nil {
+				continue
+			}
 		}
 	}
 }
@@ -170,7 +176,10 @@ func Test_ParseTwtxt(t *testing.T) {
 	// read random data into case 4
 	rando, _ := os.Open("/dev/random")
 	reader := bufio.NewReader(rando)
-	reader.Read(buf)
+	n, err := reader.Read(buf)
+	if err != nil || n == 0 {
+		t.Errorf("Couldn't set up test: %v\n", err)
+	}
 	parseTwtxtCases[3].data = buf
 
 	for _, tt := range parseTwtxtCases {
@@ -207,7 +216,10 @@ func Benchmark_ParseTwtxt(b *testing.B) {
 	// read random data into case 4
 	rando, _ := os.Open("/dev/random")
 	reader := bufio.NewReader(rando)
-	reader.Read(buf)
+	n, err := reader.Read(buf)
+	if err != nil || n == 0 {
+		b.Errorf("Couldn't set up benchmark: %v\n", err)
+	}
 	parseTwtxtCases[3].data = buf
 
 	b.ResetTimer()

@@ -45,7 +45,10 @@ func Test_UserIndex_QueryUser(t *testing.T) {
 	// read random data into case 8
 	rando, _ := os.Open("/dev/random")
 	reader := bufio.NewReader(rando)
-	reader.Read(buf)
+	n, err := reader.Read(buf)
+	if err != nil || n == 0 {
+		t.Errorf("Couldn't set up test: %v\n", err)
+	}
 	queryUserCases[3].term = string(buf)
 
 	for n, tt := range queryUserCases {
@@ -77,7 +80,10 @@ func Benchmark_UserIndex_QueryUser(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range queryUserCases {
-			index.QueryUser(tt.term)
+			_, err := index.QueryUser(tt.term)
+			if err != nil {
+				continue
+			}
 		}
 	}
 }
@@ -147,7 +153,10 @@ func Test_UserIndex_QueryInStatus(t *testing.T) {
 	// read random data into case 8
 	rando, _ := os.Open("/dev/random")
 	reader := bufio.NewReader(rando)
-	reader.Read(buf)
+	n, err := reader.Read(buf)
+	if err != nil || n == 0 {
+		t.Errorf("Couldn't set up test: %v\n", err)
+	}
 	queryInStatusCases[7].substr = string(buf)
 
 	for _, tt := range queryInStatusCases {
@@ -184,7 +193,10 @@ func Benchmark_UserIndex_QueryInStatus(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range queryInStatusCases {
-			index.QueryInStatus(tt.substr)
+			_, err := index.QueryInStatus(tt.substr)
+			if err != nil {
+				continue
+			}
 		}
 	}
 }
@@ -204,7 +216,10 @@ func Benchmark_QueryLatestStatuses(b *testing.B) {
 	index := initTestEnv()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		index.QueryAllStatuses()
+		_, err := index.QueryAllStatuses()
+		if err != nil {
+			continue
+		}
 	}
 }
 
@@ -217,7 +232,10 @@ func Test_Data_FindInStatus(t *testing.T) {
 	// read random data into case 8
 	rando, _ := os.Open("/dev/random")
 	reader := bufio.NewReader(rando)
-	reader.Read(buf)
+	n, err := reader.Read(buf)
+	if err != nil || n == 0 {
+		t.Errorf("Couldn't set up test: %v\n", err)
+	}
 	queryInStatusCases[7].substr = string(buf)
 
 	data := make([]*Data, 0)

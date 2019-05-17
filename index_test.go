@@ -4,6 +4,7 @@ package registry // import "github.com/getwtxt/registry"
 
 import (
 	"bufio"
+	"fmt"
 	"net/http"
 	"os"
 	"reflect"
@@ -59,13 +60,16 @@ func Test_UserIndex_AddUser(t *testing.T) {
 	index := initTestEnv()
 	if !addUserCases[0].localOnly {
 		http.Handle("/twtxt.txt", http.HandlerFunc(twtxtHandler))
-		go http.ListenAndServe(":8080", nil)
+		go fmt.Println(http.ListenAndServe(":8080", nil))
 	}
 	var buf = make([]byte, 256)
 	// read random data into case 5
 	rando, _ := os.Open("/dev/random")
 	reader := bufio.NewReader(rando)
-	reader.Read(buf)
+	n, err := reader.Read(buf)
+	if err != nil || n == 0 {
+		t.Errorf("Couldn't set up test: %v\n", err)
+	}
 	addUserCases[4].nick = string(buf)
 	addUserCases[4].url = string(buf)
 
@@ -108,7 +112,10 @@ func Benchmark_UserIndex_AddUser(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for _, tt := range addUserCases {
-			index.AddUser(tt.nick, tt.url)
+			err := index.AddUser(tt.nick, tt.url)
+			if err != nil {
+				continue
+			}
 			index.Reg[tt.url] = &Data{}
 		}
 	}
@@ -153,7 +160,10 @@ func Test_UserIndex_DelUser(t *testing.T) {
 	// read random data into case 5
 	rando, _ := os.Open("/dev/random")
 	reader := bufio.NewReader(rando)
-	reader.Read(buf)
+	n, err := reader.Read(buf)
+	if err != nil || n == 0 {
+		t.Errorf("Couldn't set up test: %v\n", err)
+	}
 	delUserCases[4].url = string(buf)
 
 	for n, tt := range delUserCases {
@@ -192,7 +202,10 @@ func Benchmark_UserIndex_DelUser(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range delUserCases {
-			index.DelUser(tt.url)
+			err := index.DelUser(tt.url)
+			if err != nil {
+				continue
+			}
 		}
 
 		index.Reg[delUserCases[0].url] = data1
@@ -239,7 +252,10 @@ func Test_UserIndex_GetUserStatuses(t *testing.T) {
 	// read random data into case 5
 	rando, _ := os.Open("/dev/random")
 	reader := bufio.NewReader(rando)
-	reader.Read(buf)
+	n, err := reader.Read(buf)
+	if err != nil || n == 0 {
+		t.Errorf("Couldn't set up test: %v\n", err)
+	}
 	getUserStatusCases[4].url = string(buf)
 
 	for n, tt := range getUserStatusCases {
@@ -271,7 +287,10 @@ func Benchmark_UserIndex_GetUserStatuses(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range getUserStatusCases {
-			index.GetUserStatuses(tt.url)
+			_, err := index.GetUserStatuses(tt.url)
+			if err != nil {
+				continue
+			}
 		}
 	}
 }
@@ -304,6 +323,9 @@ func Benchmark_UserIndex_GetStatuses(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		index.GetStatuses()
+		_, err := index.GetStatuses()
+		if err != nil {
+			continue
+		}
 	}
 }
