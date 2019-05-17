@@ -24,6 +24,10 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 
 	index.Mu.RLock()
 	for k, v := range index.Reg {
+		if index.Reg[k] == nil {
+			// Skip the user if their entry is uninitialized
+			continue
+		}
 		if strings.Contains(v.Nick, term) || strings.Contains(k, term) {
 			timekey[v.Date] = v.Nick + "\t" + k + "\t" + string(v.APIdate) + "\n"
 			keys = append(keys, v.Date)
