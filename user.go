@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -63,7 +64,7 @@ func (index *Index) AddUser(nick string, urls string) error {
 	// Acquire a write lock and load the user data into
 	// our index.
 	index.Mu.Lock()
-	index.Reg[urls] = &Data{Nick: nick, Date: thetime, APIdate: rfc3339date, Status: parsed}
+	index.Reg[urls] = &Data{Mu: sync.RWMutex{}, Nick: nick, Date: thetime, APIdate: rfc3339date, Status: parsed}
 	index.Mu.Unlock()
 
 	return nil

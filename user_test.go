@@ -57,6 +57,7 @@ var addUserCases = []struct {
 
 // Tests if we can successfully add a user to the index
 func Test_UserIndex_AddUser(t *testing.T) {
+	t.Parallel()
 	index := initTestEnv()
 	if !addUserCases[0].localOnly {
 		http.Handle("/twtxt.txt", http.HandlerFunc(twtxtHandler))
@@ -155,6 +156,7 @@ var delUserCases = []struct {
 
 // Tests if we can successfully delete a user from the index
 func Test_UserIndex_DelUser(t *testing.T) {
+	t.Parallel()
 	index := initTestEnv()
 	var buf = make([]byte, 256)
 	// read random data into case 5
@@ -247,6 +249,7 @@ var getUserStatusCases = []struct {
 
 // Checks if we can retrieve a single user's statuses
 func Test_UserIndex_GetUserStatuses(t *testing.T) {
+	t.Parallel()
 	index := initTestEnv()
 	var buf = make([]byte, 256)
 	// read random data into case 5
@@ -297,6 +300,7 @@ func Benchmark_UserIndex_GetUserStatuses(b *testing.B) {
 
 // Tests if we can retrieve all user statuses at once
 func Test_UserIndex_GetStatuses(t *testing.T) {
+	t.Parallel()
 	index := initTestEnv()
 	t.Run("UserIndex.GetStatuses()", func(t *testing.T) {
 
