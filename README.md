@@ -12,7 +12,7 @@ You can grab a local copy by issuing:
 $ go get -u github.com/getwtxt/registry
 ```
 
-Then, in the appropriate source file of your project, including this in your
+Then, in the appropriate source file of your project, include this in your
 `import` statement:
 
 ```go
