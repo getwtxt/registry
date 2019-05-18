@@ -12,7 +12,7 @@ import (
 
 // AddUser inserts a new user into the index. The *Data struct
 // contains the nickname and the time the user was added.
-func (index *Index) AddUser(nick string, urls string) error {
+func (index *Index) AddUser(nick, urls string, statuses TimeMap) error {
 
 	// Check that we have an initialized index.
 	if index == nil {
@@ -46,25 +46,10 @@ func (index *Index) AddUser(nick string, urls string) error {
 		log.Printf("Error formatting user add time as RFC3339: %v\n", err)
 	}
 
-	// Retrieve and parse the user's twtxt status file
-	rawdata, err := GetTwtxt(urls)
-	if err != nil {
-		return fmt.Errorf("error retrieving twtxt status file: %v", err)
-	}
-
-	parsed, errz := ParseTwtxt(rawdata)
-	if err != nil {
-		out := "error(s) parsing twtxt status file: "
-		for _, e := range errz {
-			out += fmt.Sprintf("%v, ", e)
-		}
-		return fmt.Errorf("%v", out)
-	}
-
 	// Acquire a write lock and load the user data into
 	// our index.
 	index.Mu.Lock()
-	index.Reg[urls] = &Data{Mu: sync.RWMutex{}, Nick: nick, Date: thetime, APIdate: rfc3339date, Status: parsed}
+	index.Reg[urls] = &Data{Mu: sync.RWMutex{}, Nick: nick, Date: thetime, APIdate: rfc3339date, Status: statuses}
 	index.Mu.Unlock()
 
 	return nil
