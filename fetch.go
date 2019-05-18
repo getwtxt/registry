@@ -1,5 +1,3 @@
-// Package registry implements functions and types that assist
-// in the creation and management of a twtxt registry.
 package registry // import "github.com/getwtxt/registry"
 
 import (
