@@ -1,4 +1,4 @@
-# getwtxt/registry [![Build Status](https://travis-ci.com/getwtxt/registry.svg?branch=master)](https://travis-ci.com/getwtxt/registry)
+# getwtxt/registry [![Build Status](https://travis-ci.com/getwtxt/registry.svg?branch=master)](https://travis-ci.com/getwtxt/registry) [![GoDoc](https://godoc.org/github.com/getwtxt/registry?status.svg)](https://godoc.org/github.com/getwtxt/registry)
 ### `twtxt` Registry Library for Go
 
 `getwtxt/registry` helps you implement `twtxt` registries in Go.
