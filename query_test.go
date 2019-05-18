@@ -40,7 +40,6 @@ var queryUserCases = []struct {
 // Checks if UserIndex.QueryUser() returns users that
 // match the provided substring.
 func Test_UserIndex_QueryUser(t *testing.T) {
-	t.Parallel()
 	index := initTestEnv()
 	var buf = make([]byte, 256)
 	// read random data into case 8
@@ -149,7 +148,6 @@ var queryInStatusCases = []struct {
 // the known status messages, disregarding the metadata
 // stored with each status.
 func Test_UserIndex_QueryInStatus(t *testing.T) {
-	t.Parallel()
 	index := initTestEnv()
 	var buf = make([]byte, 256)
 	// read random data into case 8
@@ -206,7 +204,6 @@ func Benchmark_UserIndex_QueryInStatus(b *testing.B) {
 // Tests whether we can retrieve the 20 most
 // recent statuses in the index
 func Test_QueryLatestStatuses(t *testing.T) {
-	t.Parallel()
 	index := initTestEnv()
 	t.Run("Latest Statuses", func(t *testing.T) {
 		out, err := index.QueryAllStatuses()
@@ -230,7 +227,6 @@ func Benchmark_QueryLatestStatuses(b *testing.B) {
 // given user's status messages, disregarding the metadata
 // stored with each status.
 func Test_Data_FindInStatus(t *testing.T) {
-	t.Parallel()
 	index := initTestEnv()
 	var buf = make([]byte, 256)
 	// read random data into case 8

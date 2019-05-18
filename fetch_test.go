@@ -89,7 +89,6 @@ var getTwtxtCases = []struct {
 // Test the function that yoinks the /twtxt.txt file
 // for a given user.
 func Test_GetTwtxt(t *testing.T) {
-	t.Parallel()
 	var buf = make([]byte, 256)
 	// read random data into case 4
 	rando, _ := os.Open("/dev/random")
@@ -173,7 +172,6 @@ var parseTwtxtCases = []struct {
 // See if we can break ParseTwtxt or get it
 // to throw an unexpected error
 func Test_ParseTwtxt(t *testing.T) {
-	t.Parallel()
 	var buf = make([]byte, 256)
 	// read random data into case 4
 	rando, _ := os.Open("/dev/random")
