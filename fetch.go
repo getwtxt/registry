@@ -62,9 +62,9 @@ func GetTwtxt(urls string) ([]byte, error) {
 	return twtxt, nil
 }
 
-// ParseTwtxt takes the output of GetTwtxt(), parses it,
-// and returns it as a TimeMap. The output may then be
-// passed to AddUser()
+// ParseTwtxt takes a fetched twtxt file in the form of
+// a slice of bytes, parses it, and returns it as a
+// TimeMap. The output may then be passed to AddUser()
 func ParseTwtxt(twtxt []byte) (TimeMap, []error) {
 	// Store timestamp parsing errors in a slice
 	// of errors.

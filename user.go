@@ -10,8 +10,7 @@ import (
 	"time"
 )
 
-// AddUser inserts a new user into the index. The *Data struct
-// contains the nickname and the time the user was added.
+// AddUser inserts a new user into the calling Index registry object.
 func (index *Index) AddUser(nick, urls string, statuses TimeMap) error {
 
 	// Check that we have an initialized index.
@@ -55,7 +54,8 @@ func (index *Index) AddUser(nick, urls string, statuses TimeMap) error {
 	return nil
 }
 
-// DelUser removes a user from the index completely.
+// DelUser removes a user and all associated data from
+// the calling Index registry object.
 func (index *Index) DelUser(urls string) error {
 
 	// Check that we have an initialized index.
@@ -90,7 +90,7 @@ func (index *Index) DelUser(urls string) error {
 	return nil
 }
 
-// GetUserStatuses returns a TimeMap containing a user's statuses
+// GetUserStatuses returns a TimeMap containing single user's statuses
 func (index *Index) GetUserStatuses(urls string) (TimeMap, error) {
 
 	// Check that we have an initialized index.
@@ -123,7 +123,7 @@ func (index *Index) GetUserStatuses(urls string) (TimeMap, error) {
 }
 
 // GetStatuses returns a TimeMap containing all statuses
-// in the index.
+// from all users in the calling Index registry object.
 func (index *Index) GetStatuses() (TimeMap, error) {
 
 	// Check that we have an initialized index.

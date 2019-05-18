@@ -3,28 +3,46 @@
 package registry // import "github.com/getwtxt/registry"
 
 import (
+	"net"
 	"sync"
 	"time"
 )
 
-// Data on each user. Data.Nick is the specified nickname.
-// Data.Date is the time.Time of the user's submission to
-// the registry. Data.APIdate is the RFC3339-formatted
-// date/time of the user's submission. Data.Status is a
-// TimeMap containing the user's statuses.
+// Data on each user.
 type Data struct {
-	Mu      sync.RWMutex
-	Nick    string
+	// Provided to aid in concurrency-safe
+	// reads and writes.
+	Mu sync.RWMutex
+
+	// Nick is the user-specified nickname.
+	Nick string
+
+	// The IP address of the user is optionally
+	// recorded.
+	IP net.IP
+
+	// The timestamp, in standard time.Time and in
+	// RFC3339 format, reflecting when the user was
+	// added.
 	Date    time.Time
 	APIdate []byte
-	Status  TimeMap
+
+	// A map[time.Time]string of the user's statuses
+	// from their twtxt file.
+	Status TimeMap
 }
 
-// Index provides an index of users constructed from a
-// map[string]*Data. A sync.RWMutex is included to restrict
-// concurrent access to the map.
+// Index provides an index of users. It holds the
+// bulk of the registry data.
 type Index struct {
-	Mu  sync.RWMutex
+	// Provided to aid in concurrency-safe
+	// reads and writes.
+	Mu sync.RWMutex
+
+	// The registry's user data is contained
+	// in this map. The functions within this
+	// library expect the key to be the URL of
+	// a given user's twtxt file.
 	Reg map[string]*Data
 }
 

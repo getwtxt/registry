@@ -8,10 +8,10 @@ import (
 	"strings"
 )
 
-// QueryUser checks the user index for usernames or URLs that contain the
-// term provided as an argument. Entries are returned sorted by the date
-// they were added to the index. If the argument provided is blank, return
-// all users.
+// QueryUser checks the calling Index registry object for usernames
+// or user URLs that contain the term provided as an argument. Entries
+// are returned sorted by the date they were added to the index. If
+// the argument provided is blank, return all users.
 func (index *Index) QueryUser(term string) ([]string, error) {
 
 	if index == nil {
@@ -43,8 +43,8 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 	return users, nil
 }
 
-// QueryInStatus returns all the known statuses that
-// contain the provided substring (tag, mention URL, etc).
+// QueryInStatus returns all statuses in the calling Index registry
+// object that contain the provided substring (tag, mention URL, etc).
 func (index *Index) QueryInStatus(substr string) ([]string, error) {
 	if substr == "" {
 		return nil, fmt.Errorf("cannot query for empty tag")
@@ -63,9 +63,8 @@ func (index *Index) QueryInStatus(substr string) ([]string, error) {
 	return statusmap.SortByTime(), nil
 }
 
-// QueryAllStatuses returns all statuses in the registry,
-// sorted by timestamp. Output is a slice of bytes, ready
-// to send to the requester.
+// QueryAllStatuses returns all statuses in the calling Index registry
+// object as a slice of strings sorted by timestamp.
 func (index *Index) QueryAllStatuses() ([]string, error) {
 	if index == nil {
 		return nil, fmt.Errorf("can't get latest statuses from empty index")
@@ -112,8 +111,8 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 }
 
 // SortByTime returns a string slice of the query results,
-// sorted by time.Time. The receiver is a TimeMapSlice. the
-// results are returned as a []byte.
+// sorted by timestamp. The receiver is a TimeMapSlice. the
+// results are returned as a []string.
 func (tm TimeMapSlice) SortByTime() []string {
 	if tm == nil {
 		return nil
