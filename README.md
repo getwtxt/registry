@@ -35,6 +35,9 @@ that needs improvement.
 
 ## Notes
 
+I did not tie this to any particular back-end / persistent on-disk storage, so the data
+exists solely in memory.
+
 * twtxt: 
   * [twtxt.readthedocs.io/en/latest/](https://twtxt.readthedocs.io/en/latest/)
 * registry documentation:
