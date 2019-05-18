@@ -5,13 +5,14 @@ package registry // import "github.com/getwtxt/registry"
 import (
 	"fmt"
 	"log"
+	"net"
 	"strings"
 	"sync"
 	"time"
 )
 
 // AddUser inserts a new user into the calling Index registry object.
-func (index *Index) AddUser(nick, urls string, statuses TimeMap) error {
+func (index *Index) AddUser(nick, urls string, ipaddr net.IP, statuses TimeMap) error {
 
 	// Check that we have an initialized index.
 	if index == nil {
@@ -25,8 +26,7 @@ func (index *Index) AddUser(nick, urls string, statuses TimeMap) error {
 		return fmt.Errorf("invalid URL: %v", urls)
 	}
 
-	// Use the double-return-value property of map lookups
-	// to check if a user already exists in the index.
+	// Check if a user already exists in the index.
 	index.Mu.RLock()
 	if _, ok := index.Reg[urls]; ok {
 		index.Mu.RUnlock()
@@ -48,7 +48,13 @@ func (index *Index) AddUser(nick, urls string, statuses TimeMap) error {
 	// Acquire a write lock and load the user data into
 	// our index.
 	index.Mu.Lock()
-	index.Reg[urls] = &Data{Mu: sync.RWMutex{}, Nick: nick, Date: thetime, APIdate: rfc3339date, Status: statuses}
+	index.Reg[urls] = &Data{
+		Mu:      sync.RWMutex{},
+		Nick:    nick,
+		IP:      ipaddr,
+		Date:    thetime,
+		APIdate: rfc3339date,
+		Status:  statuses}
 	index.Mu.Unlock()
 
 	return nil
@@ -71,8 +77,7 @@ func (index *Index) DelUser(urls string) error {
 		return fmt.Errorf("invalid URL: %v", urls)
 	}
 
-	// Use the double-return-value property of maps
-	// to check if the user exists in the index. If
+	// Check if the user exists in the index. If
 	// they don't, we can't remove them.
 	index.Mu.RLock()
 	if _, ok := index.Reg[urls]; !ok {
@@ -106,8 +111,7 @@ func (index *Index) GetUserStatuses(urls string) (TimeMap, error) {
 		return nil, fmt.Errorf("invalid URL: %v", urls)
 	}
 
-	// Use the double-return-value property of maps
-	// to check if the user is in the index. If they
+	// Check if the user is in the index. If they
 	// aren't, we can't return their statuses.
 	index.Mu.RLock()
 	if _, ok := index.Reg[urls]; !ok {
