@@ -316,7 +316,10 @@ func Test_TimeMapSlice_SortByTime(t *testing.T) {
 // Set sortMultiplier to be the number of desired
 // statuses divided by four.
 func Benchmark_TimeMapSlice_SortByTime(b *testing.B) {
-	sortMultiplier := 250000
+	// I set this to 250,000,000 and it hard-locked
+	// my laptop. Oops.
+	sortMultiplier := 250
+	b.Logf("Benchmarking SortByTime with a constructed slice of %v statuses ...\n", sortMultiplier*4)
 	index := initTestEnv()
 
 	statusmap, err := index.GetStatuses()

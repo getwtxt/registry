@@ -26,13 +26,6 @@ var addUserCases = []struct {
 		localOnly: true,
 	},
 	{
-		name:      "Unreachable twtxt File",
-		nick:      "testuser2",
-		url:       "https://example555555555.com/twtxt.txt",
-		wantErr:   true,
-		localOnly: false,
-	},
-	{
 		name:      "Empty Query",
 		nick:      "",
 		url:       "",
@@ -71,8 +64,13 @@ func Test_UserIndex_AddUser(t *testing.T) {
 	if err != nil || n == 0 {
 		t.Errorf("Couldn't set up test: %v\n", err)
 	}
-	addUserCases[4].nick = string(buf)
-	addUserCases[4].url = string(buf)
+	addUserCases[3].nick = string(buf)
+	addUserCases[3].url = string(buf)
+
+	statuses, err := index.GetStatuses()
+	if err != nil {
+		t.Errorf("Error setting up test: %v\n", err)
+	}
 
 	for n, tt := range addUserCases {
 		t.Run(tt.name, func(t *testing.T) {
@@ -80,7 +78,7 @@ func Test_UserIndex_AddUser(t *testing.T) {
 				t.Skipf("Local-only test. Skipping ... ")
 			}
 
-			err := index.AddUser(tt.nick, tt.url)
+			err := index.AddUser(tt.nick, tt.url, nil, statuses)
 
 			// only run some checks if we don't want an error
 			if !tt.wantErr {
@@ -110,10 +108,15 @@ func Test_UserIndex_AddUser(t *testing.T) {
 }
 func Benchmark_UserIndex_AddUser(b *testing.B) {
 	index := initTestEnv()
+	statuses, err := index.GetStatuses()
+	if err != nil {
+		b.Errorf("Error setting up test: %v\n", err)
+	}
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for _, tt := range addUserCases {
-			err := index.AddUser(tt.nick, tt.url)
+			err := index.AddUser(tt.nick, tt.url, nil, statuses)
 			if err != nil {
 				continue
 			}
