@@ -4,7 +4,7 @@
 `getwtxt/registry` helps you implement twtxt registries in Go.
 It uses no third-party dependencies whatsoever, only the standard library.
 
-This library is still in early development. The readme will no longer have
+This library is still in development. The readme will no longer have
 this warning or the below task list once it's at a release stage.
 
 - [x] Define types and create objects
@@ -12,10 +12,9 @@ this warning or the below task list once it's at a release stage.
 - [x] Queries (Users, Mentions, Tags) with time-sorted output
 - [x] twtxt.txt file scraping functions
 - [x] Find and squash bugs
-- [x] Refactor and optimize    `<---HERE`
-    * Make sure I didn't leave functionality out
+- [x] Refactor and optimize
     * Triple-check concurrency safety
-    * Achieve 90% test coverage
+    * Achieve 90% test coverage  `<--HERE` 
 
 ### Notes
 
