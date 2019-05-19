@@ -62,9 +62,9 @@ type TimeMapSlice []TimeMap
 // a TimeMap by timestamp.
 type TimeSlice []time.Time
 
-// NewUserIndex returns an initialized Index and its
+// NewIndex returns an initialized Index and its
 // associated sync.RWMutex
-func NewUserIndex() *Index {
+func NewIndex() *Index {
 	return &Index{
 		Mu:  sync.RWMutex{},
 		Reg: make(map[string]*Data),
