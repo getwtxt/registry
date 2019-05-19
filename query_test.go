@@ -334,7 +334,10 @@ func Benchmark_TimeMapSlice_SortByTime(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		statusmaps.SortByTime()
+		_, err := statusmaps.SortByTime()
+		if err != nil {
+			continue
+		}
 	}
 }
 
@@ -381,6 +384,9 @@ func Benchmark_TimeMap_SortByTime(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		statusmap.SortByTime()
+		_, err := statusmap.SortByTime()
+		if err != nil {
+			continue
+		}
 	}
 }
