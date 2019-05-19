@@ -177,7 +177,7 @@ func Test_UserIndex_QueryInStatus(t *testing.T) {
 			for _, e := range out {
 				split := strings.Split(string(e), "\t")
 
-				if !strings.Contains(split[3], tt.substr) {
+				if !strings.Contains(split[1], tt.substr) {
 					t.Errorf("Status without substring returned\n")
 				}
 			}
@@ -290,13 +290,13 @@ func Test_TimeMapSlice_SortByTime(t *testing.T) {
 			t.Errorf("%v\n", err)
 		}
 		split := strings.Split(sorted[0], "\t")
-		firsttime, _ := time.Parse("RFC3339", split[2])
+		firsttime, _ := time.Parse("RFC3339", split[0])
 
 		for i := range sorted {
 			if i < len(sorted)-1 {
 
 				nextsplit := strings.Split(sorted[i+1], "\t")
-				nexttime, _ := time.Parse("RFC3339", nextsplit[2])
+				nexttime, _ := time.Parse("RFC3339", nextsplit[0])
 
 				if firsttime.Before(nexttime) {
 					t.Errorf("Timestamps out of order: %v\n", sorted)
@@ -352,13 +352,13 @@ func Test_TimeMap_SortByTime(t *testing.T) {
 			t.Errorf("%v\n", err)
 		}
 		split := strings.Split(sorted[0], "\t")
-		firsttime, _ := time.Parse("RFC3339", split[2])
+		firsttime, _ := time.Parse("RFC3339", split[0])
 
 		for i := range sorted {
 			if i < len(sorted)-1 {
 
 				nextsplit := strings.Split(sorted[i+1], "\t")
-				nexttime, _ := time.Parse("RFC3339", nextsplit[2])
+				nexttime, _ := time.Parse("RFC3339", nextsplit[0])
 
 				if firsttime.Before(nexttime) {
 					t.Errorf("Timestamps out of order: %v\n", sorted)

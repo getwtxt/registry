@@ -106,7 +106,7 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 		}
 
 		parts := strings.Split(e, "\t")
-		if strings.Contains(parts[3], word) {
+		if strings.Contains(parts[1], word) {
 			statuses[k] = e
 		}
 

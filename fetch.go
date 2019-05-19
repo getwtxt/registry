@@ -81,10 +81,13 @@ func ParseTwtxt(twtxt []byte) (TimeMap, []error) {
 	// Scan the data by linebreak
 	for scanner.Scan() {
 		thetime := time.Time{}
+		if strings.HasPrefix(scanner.Text(), "#") {
+			continue
+		}
 
 		// Split the twtxt file into columns by tabs
 		columns := strings.Split(scanner.Text(), "\t")
-		if len(columns) != 4 {
+		if len(columns) != 2 {
 			return nil, append(erz, fmt.Errorf("improperly formatted data"))
 		}
 
@@ -92,7 +95,7 @@ func ParseTwtxt(twtxt []byte) (TimeMap, []error) {
 		// and convert it into a standard time.Time.
 		// If there was a parsing error, keep going,
 		// but take note.
-		err := thetime.UnmarshalText([]byte(columns[2]))
+		err := thetime.UnmarshalText([]byte(columns[0]))
 		if err != nil {
 			erz = append(erz, fmt.Errorf("unable to retrieve date: %v", err))
 		}
