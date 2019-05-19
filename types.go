@@ -8,10 +8,15 @@ import (
 	"time"
 )
 
-// Data on each user.
+// Data on each user. Used as an entry in the
+// Index wrapper struct's map.
 type Data struct {
 	// Provided to aid in concurrency-safe
-	// reads and writes.
+	// reads and writes. In most cases, the
+	// "outer" RWMutex in the Index struct
+	// should be used instead. This RWMutex
+	// is provided should the library user need
+	// to access a Data struct concurrently.
 	Mu sync.RWMutex
 
 	// Nick is the user-specified nickname.
@@ -21,13 +26,13 @@ type Data struct {
 	// recorded.
 	IP net.IP
 
-	// The timestamp, in standard time.Time and in
-	// RFC3339 format, reflecting when the user was
-	// added.
+	// The timestamp, in standard time.Time
+	// and in RFC3339 format, reflecting when
+	// the user was added.
 	Date    time.Time
 	APIdate []byte
 
-	// A map[time.Time]string of the user's statuses
+	// A TimeMap of the user's statuses
 	// from their twtxt file.
 	Status TimeMap
 }
@@ -36,7 +41,8 @@ type Data struct {
 // bulk of the registry data.
 type Index struct {
 	// Provided to aid in concurrency-safe
-	// reads and writes.
+	// reads and writes to a given registry
+	// index instance.
 	Mu sync.RWMutex
 
 	// The registry's user data is contained
