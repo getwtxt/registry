@@ -81,12 +81,13 @@ func ParseTwtxt(twtxt []byte) (TimeMap, []error) {
 	// Scan the data by linebreak
 	for scanner.Scan() {
 		thetime := time.Time{}
-		if strings.HasPrefix(scanner.Text(), "#") {
+		nopadding := strings.TrimSpace(scanner.Text())
+		if strings.HasPrefix(nopadding, "#") || nopadding == "" {
 			continue
 		}
 
 		// Split the twtxt file into columns by tabs
-		columns := strings.Split(scanner.Text(), "\t")
+		columns := strings.Split(nopadding, "\t")
 		if len(columns) != 2 {
 			return nil, append(erz, fmt.Errorf("improperly formatted data"))
 		}
