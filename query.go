@@ -58,7 +58,12 @@ func (index *Index) QueryInStatus(substr string) ([]string, error) {
 	}
 	index.Mu.RUnlock()
 
-	return statusmap.SortByTime(), nil
+	sorted, err := statusmap.SortByTime()
+	if err != nil {
+		return nil, err
+	}
+
+	return sorted, nil
 }
 
 // QueryAllStatuses returns all statuses in the calling Index registry
@@ -75,7 +80,10 @@ func (index *Index) QueryAllStatuses() ([]string, error) {
 
 	statusmaps := NewTimeMapSlice()
 	statusmaps = append(statusmaps, statusmap)
-	sorted := statusmaps.SortByTime()
+	sorted, err := statusmaps.SortByTime()
+	if err != nil {
+		return nil, err
+	}
 
 	return sorted, nil
 }
@@ -111,9 +119,11 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 // SortByTime returns a string slice of the query results,
 // sorted by timestamp. The receiver is a TimeMapSlice. the
 // results are returned as a []string.
-func (tm TimeMapSlice) SortByTime() []string {
+func (tm TimeMapSlice) SortByTime() ([]string, error) {
 	if tm == nil {
-		return nil
+		return nil, fmt.Errorf("can't sort a nil TimeMapSlice")
+	} else if len(tm) == 0 {
+		return nil, fmt.Errorf("can't sort a zero-length TimeMapSlice")
 	}
 
 	var unionmap = NewTimeMap()
@@ -138,5 +148,29 @@ func (tm TimeMapSlice) SortByTime() []string {
 		data = append(data, unionmap[e])
 	}
 
-	return data
+	return data, nil
+}
+
+// SortByTime returns a string slice of the query results,
+// sorted by timestamp.
+func (tm TimeMap) SortByTime() ([]string, error) {
+	if tm == nil {
+		return nil, fmt.Errorf("can't sort a nil TimeMap")
+	} else if len(tm) == 0 {
+		return nil, fmt.Errorf("can't sort a zero-length TimeMap")
+	}
+	var data []string
+	var times = make(TimeSlice, 0)
+
+	for k := range tm {
+		times = append(times, k)
+	}
+
+	sort.Sort(times)
+
+	for _, e := range times {
+		data = append(data, tm[e])
+	}
+
+	return data, nil
 }

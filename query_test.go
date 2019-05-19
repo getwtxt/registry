@@ -285,7 +285,10 @@ func Test_TimeMapSlice_SortByTime(t *testing.T) {
 	statusmaps = append(statusmaps, statusmap)
 
 	t.Run("Sort By Time", func(t *testing.T) {
-		sorted := statusmaps.SortByTime()
+		sorted, err := statusmaps.SortByTime()
+		if err != nil {
+			t.Errorf("%v\n", err)
+		}
 		split := strings.Split(sorted[0], "\t")
 		firsttime, _ := time.Parse("RFC3339", split[2])
 
@@ -332,5 +335,52 @@ func Benchmark_TimeMapSlice_SortByTime(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		statusmaps.SortByTime()
+	}
+}
+
+func Test_TimeMap_SortByTime(t *testing.T) {
+	index := initTestEnv()
+
+	statusmap, err := index.GetStatuses()
+	if err != nil {
+		t.Errorf("Failed to finish test initialization: %v\n", err)
+	}
+
+	t.Run("Sort By Time", func(t *testing.T) {
+		sorted, err := statusmap.SortByTime()
+		if err != nil {
+			t.Errorf("%v\n", err)
+		}
+		split := strings.Split(sorted[0], "\t")
+		firsttime, _ := time.Parse("RFC3339", split[2])
+
+		for i := range sorted {
+			if i < len(sorted)-1 {
+
+				nextsplit := strings.Split(sorted[i+1], "\t")
+				nexttime, _ := time.Parse("RFC3339", nextsplit[2])
+
+				if firsttime.Before(nexttime) {
+					t.Errorf("Timestamps out of order: %v\n", sorted)
+				}
+
+				firsttime = nexttime
+			}
+		}
+	})
+}
+
+func Benchmark_TimeMap_SortByTime(b *testing.B) {
+	index := initTestEnv()
+
+	statusmap, err := index.GetStatuses()
+	if err != nil {
+		b.Errorf("Failed to finish benchmark initialization: %v\n", err)
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		statusmap.SortByTime()
 	}
 }
