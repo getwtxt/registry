@@ -4,6 +4,9 @@
 `getwtxt/registry` helps you implement `twtxt` registries in Go.
 It uses no third-party dependencies whatsoever, only the standard library.
 
+Currently, the functionality to add new users via another registry is missing.
+I am currently working on this.
+
 ## Using the Library
 
 You can grab a local copy by issuing:
