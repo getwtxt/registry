@@ -18,13 +18,13 @@ func GetTwtxt(urls string) ([]byte, bool, error) {
 	// Check that we were provided a valid
 	// URL in the first place.
 	if !strings.HasPrefix(urls, "http") {
-		return nil, fmt.Errorf("invalid twtxt file url: %v", urls)
+		return nil, false, fmt.Errorf("invalid twtxt file url: %v", urls)
 	}
 
 	// Request the data
 	req, err := http.Get(urls)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't get %v: %v", urls, err)
+		return nil, false, fmt.Errorf("couldn't get %v: %v", urls, err)
 	}
 	defer func() {
 		err := req.Body.Close()

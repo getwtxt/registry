@@ -12,13 +12,13 @@ func Test_Integration(t *testing.T) {
 		index := NewIndex()
 
 		t.Logf("Fetching remote twtxt file ...\n")
-		mainregistry, err := GetTwtxt("https://enotty.dk/soltempore.txt")
+		mainregistry, _, err := GetTwtxt("https://enotty.dk/soltempore.txt")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
 
 		t.Logf("Parsing remote twtxt file ...\n")
-		parsed, errz := ParseTwtxt(mainregistry)
+		parsed, errz := ParseTwtxt(mainregistry, false)
 		if errz != nil {
 			t.Errorf("%v\n", errz)
 		}
@@ -80,13 +80,13 @@ func Test_Integration(t *testing.T) {
 		index := NewIndex()
 
 		t.Logf("Fetching remote twtxt file ...\n")
-		mainregistry, err := GetTwtxt("https://enotty.dk/soltempore.txt")
+		mainregistry, _, err := GetTwtxt("https://enotty.dk/soltempore.txt")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
 
 		t.Logf("Parsing remote twtxt file ...\n")
-		parsed, errz := ParseTwtxt(mainregistry)
+		parsed, errz := ParseTwtxt(mainregistry, false)
 		if errz != nil {
 			t.Errorf("%v\n", errz)
 		}

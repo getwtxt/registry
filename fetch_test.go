@@ -107,7 +107,7 @@ func Test_GetTwtxt(t *testing.T) {
 			if tt.localOnly {
 				t.Skipf("Local-only test. Skipping ... \n")
 			}
-			out, err := GetTwtxt(tt.url)
+			out, _, err := GetTwtxt(tt.url)
 			if tt.wantErr && err == nil {
 				t.Errorf("Expected error: %v\n", tt.url)
 			}
@@ -128,7 +128,7 @@ func Benchmark_GetTwtxt(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range getTwtxtCases {
-			_, err := GetTwtxt(tt.url)
+			_, _, err := GetTwtxt(tt.url)
 			if err != nil {
 				continue
 			}
@@ -186,7 +186,7 @@ func Test_ParseTwtxt(t *testing.T) {
 		}
 		t.Run(tt.name, func(t *testing.T) {
 
-			timemap, errs := ParseTwtxt(tt.data)
+			timemap, errs := ParseTwtxt(tt.data, false)
 			if errs == nil && tt.wantErr {
 				t.Errorf("Expected error(s), received none.\n")
 			}
@@ -224,7 +224,7 @@ func Benchmark_ParseTwtxt(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range parseTwtxtCases {
-			ParseTwtxt(tt.data)
+			ParseTwtxt(tt.data, false)
 		}
 	}
 }
