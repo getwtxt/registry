@@ -49,6 +49,7 @@ func (index *Index) AddUser(nick, urls string, ipaddr net.IP, statuses TimeMap) 
 	index.Reg[urls] = &Data{
 		Mu:      sync.RWMutex{},
 		Nick:    nick,
+		URL:     urls,
 		IP:      ipaddr,
 		Date:    thetime,
 		APIdate: rfc3339date,

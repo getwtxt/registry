@@ -22,6 +22,9 @@ type Data struct {
 	// Nick is the user-specified nickname.
 	Nick string
 
+	// The URL of the user's twtxt file
+	URL string
+
 	// The IP address of the user is optionally
 	// recorded.
 	IP net.IP
@@ -67,6 +70,12 @@ type TimeMapSlice []TimeMap
 // TimeSlice is a slice of time.Time used for sorting
 // a TimeMap by timestamp.
 type TimeSlice []time.Time
+
+// NewUserData returns a pointer to an initialized Data
+// struct.
+func NewUserData() *Data {
+	return &Data{}
+}
 
 // NewIndex returns an initialized Index and its
 // associated sync.RWMutex
