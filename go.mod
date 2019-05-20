@@ -1,3 +1,3 @@
-module github.com/gbmor/getwtxt/registry
+module github.com/getwtxt/registry
 
 go 1.11
