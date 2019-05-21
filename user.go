@@ -2,7 +2,6 @@ package registry // import "github.com/getwtxt/registry"
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"strings"
 	"sync"
@@ -28,7 +27,6 @@ func (index *Index) AddUser(nick, urls string, ipaddr net.IP, statuses TimeMap) 
 	index.Mu.RLock()
 	if _, ok := index.Reg[urls]; ok {
 		index.Mu.RUnlock()
-		log.Printf("User %v can't be added - already exists.\n", urls)
 		return fmt.Errorf("user %v already exists", urls)
 	}
 	index.Mu.RUnlock()
@@ -36,12 +34,10 @@ func (index *Index) AddUser(nick, urls string, ipaddr net.IP, statuses TimeMap) 
 	// Get the time as both a standard time.Time and as
 	// an RFC3339-formatted timestamp. This will be used
 	// for Data.Date and Data.APIdate to record when the
-	// user was added to the index.
+	// user was added to the index. Ignoring the error
+	// because of the near-nil possibility of it happening
 	thetime := time.Now()
-	rfc3339date, err := thetime.MarshalText()
-	if err != nil {
-		log.Printf("Error formatting user add time as RFC3339: %v\n", err)
-	}
+	rfc3339date, _ := thetime.MarshalText()
 
 	// Acquire a write lock and load the user data into
 	// our index.

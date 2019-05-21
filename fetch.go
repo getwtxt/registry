@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"sync"
@@ -32,12 +31,6 @@ func GetTwtxt(urls string) ([]byte, bool, error) {
 	if err != nil {
 		return nil, false, fmt.Errorf("couldn't get %v: %v", urls, err)
 	}
-	defer func() {
-		err := req.Body.Close()
-		if err != nil {
-			log.Printf("Couldn't close response body for %v: %v\n", urls, err)
-		}
-	}()
 
 	// Verify that we've received text-only content
 	// and not something else.
