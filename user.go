@@ -137,9 +137,13 @@ func (index *Index) ScrapeRemoteRegistry(urls string) error {
 		return err
 	}
 
+	// only add new users so we don't overwrite data
+	// we already have (and lose statuses, etc)
 	index.Mu.Lock()
 	for _, e := range data {
-		index.Reg[e.URL] = e
+		if _, ok := index.Reg[e.URL]; !ok {
+			index.Reg[e.URL] = e
+		}
 	}
 	index.Mu.Unlock()
 
