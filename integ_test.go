@@ -18,7 +18,7 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Parsing remote twtxt file ...\n")
-		parsed, errz := ParseTwtxt(mainregistry)
+		parsed, errz := ParseUserTwtxt(mainregistry)
 		if errz != nil {
 			t.Errorf("%v\n", errz)
 		}
@@ -86,7 +86,7 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Parsing remote twtxt file ...\n")
-		parsed, errz := ParseTwtxt(mainregistry)
+		parsed, errz := ParseUserTwtxt(mainregistry)
 		if errz != nil {
 			t.Errorf("%v\n", errz)
 		}

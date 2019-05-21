@@ -108,7 +108,7 @@ func (index *Index) UpdateUser(urls string) error {
 	}
 
 	// update the user's entry in the Index
-	data, err := ParseTwtxt(out)
+	data, err := ParseUserTwtxt(out)
 	if err != nil {
 		return err
 	}

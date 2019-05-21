@@ -169,7 +169,7 @@ var parseTwtxtCases = []struct {
 
 // See if we can break ParseTwtxt or get it
 // to throw an unexpected error
-func Test_ParseTwtxt(t *testing.T) {
+func Test_ParseUserTwtxt(t *testing.T) {
 	var buf = make([]byte, 256)
 	// read random data into case 4
 	rando, _ := os.Open("/dev/random")
@@ -186,7 +186,7 @@ func Test_ParseTwtxt(t *testing.T) {
 		}
 		t.Run(tt.name, func(t *testing.T) {
 
-			timemap, errs := ParseTwtxt(tt.data)
+			timemap, errs := ParseUserTwtxt(tt.data)
 			if errs == nil && tt.wantErr {
 				t.Errorf("Expected error(s), received none.\n")
 			}
@@ -206,7 +206,7 @@ func Test_ParseTwtxt(t *testing.T) {
 	}
 }
 
-func Benchmark_ParseTwtxt(b *testing.B) {
+func Benchmark_ParseUserTwtxt(b *testing.B) {
 	var buf = make([]byte, 256)
 	// read random data into case 4
 	rando, _ := os.Open("/dev/random")
@@ -221,7 +221,7 @@ func Benchmark_ParseTwtxt(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range parseTwtxtCases {
-			ParseTwtxt(tt.data)
+			_, _ = ParseUserTwtxt(tt.data)
 		}
 	}
 }
