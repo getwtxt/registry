@@ -135,7 +135,6 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*Data, error) {
 	// Scan the data by linebreak
 	for scanner.Scan() {
 
-		thetime := time.Time{}
 		nopadding := strings.TrimSpace(scanner.Text())
 
 		// check if we've happened upon a comment or a blank line
@@ -153,7 +152,7 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*Data, error) {
 		// and convert it into a standard time.Time.
 		// If there was a parsing error, keep going
 		// and skip that status.
-		err := thetime.UnmarshalText([]byte(columns[2]))
+		thetime, err := time.Parse(time.RFC3339, columns[2])
 		if err != nil {
 			erz = append(erz, []byte(fmt.Sprintf("%v\n", err))...)
 			continue
