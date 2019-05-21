@@ -83,9 +83,7 @@ func (index *Index) QueryAllStatuses() ([]string, error) {
 		return nil, err
 	}
 
-	statusmaps := NewTimeMapSlice()
-	statusmaps = append(statusmaps, statusmap)
-	sorted, err := statusmaps.SortByTime()
+	sorted, err := statusmap.SortByTime()
 	if err != nil {
 		return nil, err
 	}
