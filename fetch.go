@@ -115,6 +115,9 @@ func ParseTwtxt(twtxt []byte) (TimeMap, error) {
 		// Add the status to the TimeMap
 		timemap[thetime] = scanner.Text()
 	}
+	if len(erz) == 0 {
+		return timemap, nil
+	}
 	return timemap, fmt.Errorf("%v", erz)
 }
 
