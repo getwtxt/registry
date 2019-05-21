@@ -207,7 +207,7 @@ func (index *Index) GetStatuses() (TimeMap, error) {
 		}
 		for a, b := range v.Status {
 			if _, ok := v.Status[a]; ok {
-				statuses[a] = v.Nick + "\t" + v.URL + "\t" + b
+				statuses[a] = b
 			}
 		}
 	}
