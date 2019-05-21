@@ -122,8 +122,8 @@ func (index *Index) UpdateUser(urls string) error {
 	return nil
 }
 
-// AddRemoteRegistry adds the users who are available via remote registry
-func (index *Index) AddRemoteRegistry(urls string) error {
+// ScrapeRemoteRegistry adds the users who are available via remote registry
+func (index *Index) ScrapeRemoteRegistry(urls string) error {
 	//fetch the remote registry's entries
 	out, registry, err := GetTwtxt(urls)
 	if err != nil {
