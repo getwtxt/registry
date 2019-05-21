@@ -72,7 +72,9 @@ type TimeSlice []time.Time
 // NewUserData returns a pointer to an initialized Data
 // struct.
 func NewUserData() *Data {
-	return &Data{}
+	return &Data{
+		Status: NewTimeMap(),
+	}
 }
 
 // NewIndex returns an initialized Index and its
