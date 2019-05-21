@@ -67,7 +67,7 @@ func GetTwtxt(urls string) ([]byte, bool, error) {
 // ParseUserTwtxt takes a fetched twtxt file in the form of
 // a slice of bytes, parses it, and returns it as a
 // TimeMap. The output may then be passed to AddUser()
-func ParseUserTwtxt(twtxt []byte) (TimeMap, error) {
+func ParseUserTwtxt(twtxt []byte, nick, urls string) (TimeMap, error) {
 	// Store timestamp parsing errors in a slice
 	// of errors.
 	var erz []byte
@@ -84,7 +84,6 @@ func ParseUserTwtxt(twtxt []byte) (TimeMap, error) {
 
 	// Scan the data by linebreak
 	for scanner.Scan() {
-		thetime := time.Time{}
 		nopadding := strings.TrimSpace(scanner.Text())
 		if strings.HasPrefix(nopadding, "#") || nopadding == "" {
 			continue
@@ -100,13 +99,13 @@ func ParseUserTwtxt(twtxt []byte) (TimeMap, error) {
 		// and convert it into a standard time.Time.
 		// If there was a parsing error, keep going,
 		// but take note.
-		err := thetime.UnmarshalText([]byte(columns[0]))
+		thetime, err := time.Parse(time.RFC3339, columns[0])
 		if err != nil {
 			erz = append(erz, []byte(fmt.Sprintf("unable to retrieve date: %v\n", err))...)
 		}
 
 		// Add the status to the TimeMap
-		timemap[thetime] = scanner.Text()
+		timemap[thetime] = nick + "\t" + urls + "\t" + nopadding
 	}
 	if len(erz) == 0 {
 		return timemap, nil
@@ -173,7 +172,7 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*Data, error) {
 
 		if inIndex {
 			tmp := userdata[dataIndex]
-			tmp.Status[thetime] = columns[2] + "\t" + columns[3]
+			tmp.Status[thetime] = nopadding
 			userdata[dataIndex] = tmp
 		} else {
 			// If the user hasn't been seen before,
@@ -189,7 +188,7 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*Data, error) {
 				URL:  parsedurl,
 				Date: timeNowRFC,
 				Status: TimeMap{
-					thetime: columns[2] + "\t" + columns[3],
+					thetime: nopadding,
 				},
 			}
 

@@ -101,8 +101,13 @@ func (index *Index) UpdateUser(urls string) error {
 		return fmt.Errorf("attempting to update registry URL - users should be updated individually")
 	}
 
+	index.Mu.RLock()
+	user := index.Reg[urls]
+	index.Mu.RUnlock()
+	nick := user.Nick
+
 	// update the user's entry in the Index
-	data, err := ParseUserTwtxt(out)
+	data, err := ParseUserTwtxt(out, nick, urls)
 	if err != nil {
 		return err
 	}
