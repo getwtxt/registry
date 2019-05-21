@@ -103,11 +103,11 @@ func (t TimeSlice) Len() int {
 	return len(t)
 }
 
-// Less returns true if the timestamp at index i is before
+// Less returns true if the timestamp at index i is after
 // the timestamp at index j in a given TimeSlice.
 // This helps satisfy sort.Interface.
 func (t TimeSlice) Less(i, j int) bool {
-	return t[i].Before(t[j])
+	return t[i].After(t[j])
 }
 
 // Swap transposes the timestamps at the two given indices
