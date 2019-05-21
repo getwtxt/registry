@@ -29,11 +29,9 @@ type Data struct {
 	// recorded.
 	IP net.IP
 
-	// The timestamp, in standard time.Time
-	// and in RFC3339 format, reflecting when
-	// the user was added.
-	Date    time.Time
-	APIdate []byte
+	// The timestamp, in RFC3339 format,
+	// reflecting when the user was added.
+	Date string
 
 	// A TimeMap of the user's statuses
 	// from their twtxt file.

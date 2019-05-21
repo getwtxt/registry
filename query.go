@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 )
 
 // QueryUser checks the calling Index registry object for usernames
@@ -27,8 +28,12 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 			continue
 		}
 		if strings.Contains(v.Nick, term) || strings.Contains(k, term) {
-			timekey[v.Date] = v.Nick + "\t" + k + "\t" + string(v.APIdate) + "\n"
-			keys = append(keys, v.Date)
+			thetime, err := time.Parse(time.RFC3339, v.Date)
+			if err != nil {
+				continue
+			}
+			timekey[thetime] = v.Nick + "\t" + k + "\t" + v.Date + "\n"
+			keys = append(keys, thetime)
 		}
 	}
 	index.Mu.RUnlock()

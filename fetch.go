@@ -179,19 +179,16 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*Data, error) {
 		} else {
 			// If the user hasn't been seen before,
 			// create a new Data object
-			timeNow := time.Now()
-
-			timeNowRFC, err := timeNow.MarshalText()
+			timeNowRFC := time.Now().Format(time.RFC3339)
 			if err != nil {
 				erz = append(erz, []byte(fmt.Sprintf("%v\n", err))...)
 			}
 
 			tmp := &Data{
-				Mu:      sync.RWMutex{},
-				Nick:    parsednick,
-				URL:     parsedurl,
-				Date:    timeNow,
-				APIdate: timeNowRFC,
+				Mu:   sync.RWMutex{},
+				Nick: parsednick,
+				URL:  parsedurl,
+				Date: timeNowRFC,
 				Status: TimeMap{
 					thetime: columns[2] + "\t" + columns[3],
 				},

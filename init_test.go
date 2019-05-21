@@ -21,46 +21,40 @@ func initTestEnv() *Index {
 	// this is a bit tedious, but set up fake dates
 	// for the mock users' join and status timestamps
 	timeMonthPrev := time.Now().AddDate(0, -1, 0)
-	timeMonthPrevRFC, err := timeMonthPrev.MarshalText()
-	quickErr(err)
+	timeMonthPrevRFC := timeMonthPrev.Format(time.RFC3339)
 
 	timeTwoMonthsPrev := time.Now().AddDate(0, -2, 0)
-	timeTwoMonthsPrevRFC, err := timeTwoMonthsPrev.MarshalText()
-	quickErr(err)
+	timeTwoMonthsPrevRFC := timeTwoMonthsPrev.Format(time.RFC3339)
 
 	timeThreeMonthsPrev := time.Now().AddDate(0, -3, 0)
-	timeThreeMonthsPrevRFC, err := timeThreeMonthsPrev.MarshalText()
-	quickErr(err)
+	timeThreeMonthsPrevRFC := timeThreeMonthsPrev.Format(time.RFC3339)
 
 	timeFourMonthsPrev := time.Now().AddDate(0, -4, 0)
-	timeFourMonthsPrevRFC, err := timeFourMonthsPrev.MarshalText()
-	quickErr(err)
+	timeFourMonthsPrevRFC := timeFourMonthsPrev.Format(time.RFC3339)
 
 	var mockusers = []struct {
 		url     string
 		nick    string
-		date    time.Time
+		date    string
 		apidate []byte
 		status  TimeMap
 	}{
 		{
-			url:     "https://example3.com/twtxt.txt",
-			nick:    "foo_barrington",
-			date:    timeTwoMonthsPrev,
-			apidate: timeTwoMonthsPrevRFC,
+			url:  "https://example3.com/twtxt.txt",
+			nick: "foo_barrington",
+			date: timeTwoMonthsPrevRFC,
 			status: TimeMap{
-				timeTwoMonthsPrev: string(timeTwoMonthsPrevRFC) + "\tJust got started with #twtxt!",
-				timeMonthPrev:     string(timeMonthPrevRFC) + "\tHey <@foo https://example.com/twtxt.txt>, I love programming. Just FYI.",
+				timeTwoMonthsPrev: timeTwoMonthsPrevRFC + "\tJust got started with #twtxt!",
+				timeMonthPrev:     timeMonthPrevRFC + "\tHey <@foo https://example.com/twtxt.txt>, I love programming. Just FYI.",
 			},
 		},
 		{
-			url:     "https://example.com/twtxt.txt",
-			nick:    "foo",
-			date:    timeFourMonthsPrev,
-			apidate: timeFourMonthsPrevRFC,
+			url:  "https://example.com/twtxt.txt",
+			nick: "foo",
+			date: timeFourMonthsPrevRFC,
 			status: TimeMap{
-				timeFourMonthsPrev:  string(timeFourMonthsPrevRFC) + "\tThis is so much better than #twitter",
-				timeThreeMonthsPrev: string(timeThreeMonthsPrevRFC) + "\tI can't wait to start on my next programming #project with <@foo_barrington https://example3.com/twtxt.txt>",
+				timeFourMonthsPrev:  timeFourMonthsPrevRFC + "\tThis is so much better than #twitter",
+				timeThreeMonthsPrev: timeThreeMonthsPrevRFC + "\tI can't wait to start on my next programming #project with <@foo_barrington https://example3.com/twtxt.txt>",
 			},
 		},
 	}
@@ -70,7 +64,7 @@ func initTestEnv() *Index {
 	for _, e := range mockusers {
 		data := &Data{}
 		data.Nick = e.nick
-		data.APIdate = e.apidate
+		data.Date = e.date
 		data.Status = e.status
 		index.Reg[e.url] = data
 	}

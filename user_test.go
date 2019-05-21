@@ -187,17 +187,15 @@ func Benchmark_UserIndex_DelUser(b *testing.B) {
 	index := initTestEnv()
 
 	data1 := &Data{
-		Nick:    index.Reg[delUserCases[0].url].Nick,
-		Date:    index.Reg[delUserCases[0].url].Date,
-		APIdate: index.Reg[delUserCases[0].url].APIdate,
-		Status:  index.Reg[delUserCases[0].url].Status,
+		Nick:   index.Reg[delUserCases[0].url].Nick,
+		Date:   index.Reg[delUserCases[0].url].Date,
+		Status: index.Reg[delUserCases[0].url].Status,
 	}
 
 	data2 := &Data{
-		Nick:    index.Reg[delUserCases[1].url].Nick,
-		Date:    index.Reg[delUserCases[1].url].Date,
-		APIdate: index.Reg[delUserCases[1].url].APIdate,
-		Status:  index.Reg[delUserCases[1].url].Status,
+		Nick:   index.Reg[delUserCases[1].url].Nick,
+		Date:   index.Reg[delUserCases[1].url].Date,
+		Status: index.Reg[delUserCases[1].url].Status,
 	}
 	b.ResetTimer()
 

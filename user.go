@@ -37,19 +37,17 @@ func (index *Index) AddUser(nick, urls string, ipaddr net.IP, statuses TimeMap) 
 	// user was added to the index. Ignoring the error
 	// because of the near-nil possibility of it happening
 	thetime := time.Now()
-	rfc3339date, _ := thetime.MarshalText()
 
 	// Acquire a write lock and load the user data into
 	// our index.
 	index.Mu.Lock()
 	index.Reg[urls] = &Data{
-		Mu:      sync.RWMutex{},
-		Nick:    nick,
-		URL:     urls,
-		IP:      ipaddr,
-		Date:    thetime,
-		APIdate: rfc3339date,
-		Status:  statuses}
+		Mu:     sync.RWMutex{},
+		Nick:   nick,
+		URL:    urls,
+		IP:     ipaddr,
+		Date:   thetime.Format(time.RFC3339),
+		Status: statuses}
 	index.Mu.Unlock()
 
 	return nil
