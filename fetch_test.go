@@ -186,17 +186,14 @@ func Test_ParseTwtxt(t *testing.T) {
 		}
 		t.Run(tt.name, func(t *testing.T) {
 
-			timemap, errs := ParseTwtxt(tt.data, false)
+			timemap, errs := ParseTwtxt(tt.data)
 			if errs == nil && tt.wantErr {
 				t.Errorf("Expected error(s), received none.\n")
 			}
 
 			if !tt.wantErr {
-
-				for _, e := range errs {
-					if e != nil {
-						t.Errorf("Unexpected error: %v\n", e)
-					}
+				if errs != nil {
+					t.Errorf("Unexpected error: %v\n", errs)
 				}
 
 				for k, v := range timemap {
@@ -224,7 +221,7 @@ func Benchmark_ParseTwtxt(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range parseTwtxtCases {
-			ParseTwtxt(tt.data, false)
+			ParseTwtxt(tt.data)
 		}
 	}
 }

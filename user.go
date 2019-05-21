@@ -94,6 +94,62 @@ func (index *Index) DelUser(urls string) error {
 	return nil
 }
 
+// UpdateUser adds new statuses to the user's entry in the registry.
+func (index *Index) UpdateUser(urls string) error {
+	// fetch the twtxt file data
+	out, registry, err := GetTwtxt(urls)
+	if err != nil {
+		return err
+	}
+
+	// if we've somehow fetched a registry's data, error out
+	if registry {
+		return fmt.Errorf("attempting to update registry URL - users should be updated individually")
+	}
+
+	// update the user's entry in the Index
+	data, err := ParseTwtxt(out)
+	if err != nil {
+		return err
+	}
+	index.Mu.Lock()
+	tmp := index.Reg[urls]
+	for i, e := range data {
+		tmp.Status[i] = e
+	}
+	index.Mu.Unlock()
+
+	return nil
+}
+
+// AddRemoteRegistry adds the users who are available via remote registry
+func (index *Index) AddRemoteRegistry(urls string) error {
+	//fetch the remote registry's entries
+	out, registry, err := GetTwtxt(urls)
+	if err != nil {
+		return err
+	}
+
+	// if we're working with an individual's twtxt file, error out
+	if !registry {
+		return fmt.Errorf("can't add single user via call to AddRemoteRegistry")
+	}
+
+	// parse the registry's data and add to our Index
+	data, err := ParseRegistryTwtxt(out)
+	if err != nil {
+		return err
+	}
+
+	index.Mu.Lock()
+	for _, e := range data {
+		index.Reg[e.URL] = e
+	}
+	index.Mu.Unlock()
+
+	return nil
+}
+
 // GetUserStatuses returns a TimeMap containing single user's statuses
 func (index *Index) GetUserStatuses(urls string) (TimeMap, error) {
 
