@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -15,7 +16,9 @@ func constructTwtxt() []byte {
 	// iterates through each mock user's mock statuses
 	for _, v := range index.Reg {
 		for _, e := range v.Status {
-			resp = append(resp, []byte(fmt.Sprintf(e+"\n"))...)
+			split := strings.Split(e, "\t")
+			status := []byte(split[2] + "\t" + split[3] + "\n")
+			resp = append(resp, status...)
 		}
 	}
 	return resp
@@ -185,7 +188,6 @@ func Test_ParseUserTwtxt(t *testing.T) {
 			t.Skipf("Local-only test: Skipping ... \n")
 		}
 		t.Run(tt.name, func(t *testing.T) {
-
 			timemap, errs := ParseUserTwtxt(tt.data, "testuser", "testurl")
 			if errs == nil && tt.wantErr {
 				t.Errorf("Expected error(s), received none.\n")
