@@ -4,8 +4,8 @@
 `getwtxt/registry` helps you implement `twtxt` registries in Go.
 It uses no third-party dependencies whatsoever, only the standard library.
 
-This library is currently being tested via development of `getwtxt`. Until `getwtxt`
-is completed, it should be considered untested outside of unit tests.
+This library is currently being debugged via development of `getwtxt`. Until `getwtxt`
+is completed, it should be considered unfit for production use.
 
 ## Using the Library
 
