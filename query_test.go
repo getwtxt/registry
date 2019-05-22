@@ -177,7 +177,7 @@ func Test_UserIndex_QueryInStatus(t *testing.T) {
 			for _, e := range out {
 				split := strings.Split(string(e), "\t")
 
-				if !strings.Contains(split[1], tt.substr) {
+				if !strings.Contains(split[3], tt.substr) {
 					t.Errorf("Status without substring returned\n")
 				}
 			}

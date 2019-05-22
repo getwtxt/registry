@@ -44,8 +44,8 @@ func initTestEnv() *Index {
 			nick: "foo_barrington",
 			date: timeTwoMonthsPrevRFC,
 			status: TimeMap{
-				timeTwoMonthsPrev: timeTwoMonthsPrevRFC + "\tJust got started with #twtxt!",
-				timeMonthPrev:     timeMonthPrevRFC + "\tHey <@foo https://example.com/twtxt.txt>, I love programming. Just FYI.",
+				timeTwoMonthsPrev: "foo_barrington\thttps://example3.com/twtxt.txt\t" + timeTwoMonthsPrevRFC + "\tJust got started with #twtxt!",
+				timeMonthPrev:     "foo_barrington\thttps://example3.com/twtxt.txt\t" + timeMonthPrevRFC + "\tHey <@foo https://example.com/twtxt.txt>, I love programming. Just FYI.",
 			},
 		},
 		{
@@ -53,8 +53,8 @@ func initTestEnv() *Index {
 			nick: "foo",
 			date: timeFourMonthsPrevRFC,
 			status: TimeMap{
-				timeFourMonthsPrev:  timeFourMonthsPrevRFC + "\tThis is so much better than #twitter",
-				timeThreeMonthsPrev: timeThreeMonthsPrevRFC + "\tI can't wait to start on my next programming #project with <@foo_barrington https://example3.com/twtxt.txt>",
+				timeFourMonthsPrev:  "foo\thttps://example.com/twtxt.txt\t" + timeFourMonthsPrevRFC + "\tThis is so much better than #twitter",
+				timeThreeMonthsPrev: "foo\thttps://example.com/twtxt.txt\t" + timeThreeMonthsPrevRFC + "\tI can't wait to start on my next programming #project with <@foo_barrington https://example3.com/twtxt.txt>",
 			},
 		},
 	}
