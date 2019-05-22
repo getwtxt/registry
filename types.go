@@ -73,6 +73,7 @@ type TimeSlice []time.Time
 // struct.
 func NewUserData() *Data {
 	return &Data{
+		Mu:     sync.RWMutex{},
 		Status: NewTimeMap(),
 	}
 }
@@ -104,7 +105,8 @@ func (t TimeSlice) Len() int {
 }
 
 // Less returns true if the timestamp at index i is after
-// the timestamp at index j in a given TimeSlice.
+// the timestamp at index j in a given TimeSlice. Results
+// in a descending sort order for times.
 // This helps satisfy sort.Interface.
 func (t TimeSlice) Less(i, j int) bool {
 	return t[i].After(t[j])
