@@ -1,6 +1,7 @@
 package registry //import "github.com/getwtxt/registry"
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -8,7 +9,7 @@ import (
 
 func quickErr(err error) {
 	if err != nil {
-		log.Printf("%v\n", err)
+		fmt.Printf("%v\n", err)
 	}
 }
 
