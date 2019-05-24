@@ -55,7 +55,7 @@ func (index *Index) QueryInStatus(substr string) ([]string, error) {
 		return nil, fmt.Errorf("can't query statuses of empty index")
 	}
 
-	statusmap := NewTimeMapSlice()
+	statusmap := make([]TimeMap, 0)
 
 	index.Mu.RLock()
 	for _, v := range index.Reg {
@@ -63,7 +63,7 @@ func (index *Index) QueryInStatus(substr string) ([]string, error) {
 	}
 	index.Mu.RUnlock()
 
-	sorted, err := statusmap.SortByTime()
+	sorted, err := SortByTime(statusmap...)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (index *Index) QueryAllStatuses() ([]string, error) {
 		return nil, err
 	}
 
-	sorted, err := statusmap.SortByTime()
+	sorted, err := SortByTime(statusmap)
 	if err != nil {
 		return nil, err
 	}
@@ -120,43 +120,8 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 }
 
 // SortByTime returns a string slice of the query results,
-// sorted by timestamp. The receiver is a TimeMapSlice. the
-// results are returned as a []string.
-func (tm TimeMapSlice) SortByTime() ([]string, error) {
-	if tm == nil {
-		return nil, fmt.Errorf("can't sort a nil TimeMapSlice")
-	} else if len(tm) == 0 {
-		return nil, fmt.Errorf("can't sort a zero-length TimeMapSlice")
-	}
-
-	var unionmap = NewTimeMap()
-	var times = make(TimeSlice, 0)
-	var data []string
-
-	for _, e := range tm {
-		for k, v := range e {
-			if _, ok := e[k]; ok {
-				unionmap[k] = v
-			}
-		}
-	}
-
-	for k := range unionmap {
-		times = append(times, k)
-	}
-
-	sort.Sort(times)
-
-	for _, e := range times {
-		data = append(data, unionmap[e])
-	}
-
-	return data, nil
-}
-
-// SortByTime returns a string slice of the query results,
 // sorted by timestamp.
-func (tm TimeMap) SortByTime() ([]string, error) {
+func SortByTime(tm ...TimeMap) ([]string, error) {
 	if tm == nil {
 		return nil, fmt.Errorf("can't sort a nil TimeMap")
 	} else if len(tm) == 0 {
@@ -165,14 +130,18 @@ func (tm TimeMap) SortByTime() ([]string, error) {
 	var data []string
 	var times = make(TimeSlice, 0)
 
-	for k := range tm {
-		times = append(times, k)
+	for _, e := range tm {
+		for k := range e {
+			times = append(times, k)
+		}
 	}
 
 	sort.Sort(times)
 
-	for _, e := range times {
-		data = append(data, tm[e])
+	for k := range tm {
+		for _, e := range times {
+			data = append(data, tm[k][e])
+		}
 	}
 
 	return data, nil

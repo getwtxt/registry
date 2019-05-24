@@ -273,7 +273,7 @@ func Benchmark_Data_FindInStatus(b *testing.B) {
 	}
 }
 
-func Test_TimeMapSlice_SortByTime(t *testing.T) {
+func Test_SortByTime_Slice(t *testing.T) {
 	index := initTestEnv()
 
 	statusmap, err := index.GetStatuses()
@@ -281,11 +281,8 @@ func Test_TimeMapSlice_SortByTime(t *testing.T) {
 		t.Errorf("Failed to finish test initialization: %v\n", err)
 	}
 
-	statusmaps := NewTimeMapSlice()
-	statusmaps = append(statusmaps, statusmap)
-
-	t.Run("Sort By Time", func(t *testing.T) {
-		sorted, err := statusmaps.SortByTime()
+	t.Run("Sort By Time ([]TimeMap)", func(t *testing.T) {
+		sorted, err := SortByTime(statusmap)
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -312,7 +309,7 @@ func Test_TimeMapSlice_SortByTime(t *testing.T) {
 // Right now it's at roughly 2000ns per 2 statuses.
 // Set sortMultiplier to be the number of desired
 // statuses divided by four.
-func Benchmark_TimeMapSlice_SortByTime(b *testing.B) {
+func Benchmark_SortByTime_Slice(b *testing.B) {
 	// I set this to 250,000,000 and it hard-locked
 	// my laptop. Oops.
 	sortMultiplier := 250
@@ -326,7 +323,7 @@ func Benchmark_TimeMapSlice_SortByTime(b *testing.B) {
 
 	// Constructed index has four statuses. This
 	// makes a TimeMapSlice of 1000000 statuses.
-	statusmaps := NewTimeMapSlice()
+	statusmaps := make([]TimeMap, sortMultiplier*4)
 	for i := 0; i < sortMultiplier; i++ {
 		statusmaps = append(statusmaps, statusmap)
 	}
@@ -334,14 +331,14 @@ func Benchmark_TimeMapSlice_SortByTime(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		_, err := statusmaps.SortByTime()
+		_, err := SortByTime(statusmaps...)
 		if err != nil {
 			continue
 		}
 	}
 }
 
-func Test_TimeMap_SortByTime(t *testing.T) {
+func Test_SortByTime_Single(t *testing.T) {
 	index := initTestEnv()
 
 	statusmap, err := index.GetStatuses()
@@ -349,8 +346,8 @@ func Test_TimeMap_SortByTime(t *testing.T) {
 		t.Errorf("Failed to finish test initialization: %v\n", err)
 	}
 
-	t.Run("Sort By Time", func(t *testing.T) {
-		sorted, err := statusmap.SortByTime()
+	t.Run("Sort By Time (TimeMap)", func(t *testing.T) {
+		sorted, err := SortByTime(statusmap)
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -373,7 +370,7 @@ func Test_TimeMap_SortByTime(t *testing.T) {
 	})
 }
 
-func Benchmark_TimeMap_SortByTime(b *testing.B) {
+func Benchmark_SortByTime_Single(b *testing.B) {
 	index := initTestEnv()
 
 	statusmap, err := index.GetStatuses()
@@ -384,7 +381,7 @@ func Benchmark_TimeMap_SortByTime(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		_, err := statusmap.SortByTime()
+		_, err := SortByTime(statusmap)
 		if err != nil {
 			continue
 		}

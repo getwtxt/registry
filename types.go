@@ -59,12 +59,6 @@ type Index struct {
 // RFC3339 timestamp.
 type TimeMap map[time.Time]string
 
-// TimeMapSlice is a slice of TimeMap. Used for sorting the
-// output of aggregate queries such as GetStatuses() by
-// timestamp. Also used for combining the output of those
-// same queries into a single TimeMap.
-type TimeMapSlice []TimeMap
-
 // TimeSlice is a slice of time.Time used for sorting
 // a TimeMap by timestamp.
 type TimeSlice []time.Time
@@ -90,12 +84,6 @@ func NewIndex() *Index {
 // NewTimeMap returns an initialized TimeMap.
 func NewTimeMap() TimeMap {
 	return make(TimeMap)
-}
-
-// NewTimeMapSlice returns an initialized slice of
-// TimeMaps with zero length.
-func NewTimeMapSlice() TimeMapSlice {
-	return make(TimeMapSlice, 0)
 }
 
 // Len returns the length of the TimeSlice to be sorted.
