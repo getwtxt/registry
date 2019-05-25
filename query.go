@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-// QueryUser checks the calling Index registry object for usernames
+// QueryUser checks the Index for usernames
 // or user URLs that contain the term provided as an argument. Entries
-// are returned sorted by the date they were added to the index. If
+// are returned sorted by the date they were added to the Index. If
 // the argument provided is blank, return all users.
 func (index *Index) QueryUser(term string) ([]string, error) {
 
@@ -47,10 +47,10 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 	return users, nil
 }
 
-// QueryInStatus returns all statuses in the calling Index registry
-// object that contain the provided substring (tag, mention URL, etc).
-func (index *Index) QueryInStatus(substr string) ([]string, error) {
-	if substr == "" {
+// QueryInStatus returns all statuses in the Index
+// that contain the provided substring (tag, mention URL, etc).
+func (index *Index) QueryInStatus(substring string) ([]string, error) {
+	if substring == "" {
 		return nil, fmt.Errorf("cannot query for empty tag")
 	} else if index == nil {
 		return nil, fmt.Errorf("can't query statuses of empty index")
@@ -60,7 +60,7 @@ func (index *Index) QueryInStatus(substr string) ([]string, error) {
 
 	index.Mu.RLock()
 	for _, v := range index.Reg {
-		statusmap = append(statusmap, v.FindInStatus(substr))
+		statusmap = append(statusmap, v.FindInStatus(substring))
 	}
 	index.Mu.RUnlock()
 
@@ -72,8 +72,8 @@ func (index *Index) QueryInStatus(substr string) ([]string, error) {
 	return sorted, nil
 }
 
-// QueryAllStatuses returns all statuses in the calling Index registry
-// object as a slice of strings sorted by timestamp.
+// QueryAllStatuses returns all statuses in the Index
+// as a slice of strings sorted by timestamp.
 func (index *Index) QueryAllStatuses() ([]string, error) {
 	if index == nil {
 		return nil, fmt.Errorf("can't get latest statuses from empty index")
@@ -93,15 +93,15 @@ func (index *Index) QueryAllStatuses() ([]string, error) {
 }
 
 // FindInStatus takes a user's statuses and looks for a given substring.
-// Returns the statuses with the substring as a TimeMap.
-func (userdata *Data) FindInStatus(word string) TimeMap {
+// Returns the statuses that include the substring as a TimeMap.
+func (userdata *Data) FindInStatus(substring string) TimeMap {
 	if userdata == nil {
 		return nil
-	} else if len(word) > 140 {
+	} else if len(substring) > 140 {
 		return nil
 	}
 
-	word = strings.ToLower(word)
+	substring = strings.ToLower(substring)
 	statuses := NewTimeMap()
 
 	userdata.Mu.RLock()
@@ -111,7 +111,7 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 		}
 
 		parts := strings.Split(strings.ToLower(e), "\t")
-		if strings.Contains(parts[3], word) {
+		if strings.Contains(parts[3], substring) {
 			statuses[k] = e
 		}
 
@@ -122,7 +122,7 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 }
 
 // SortByTime returns a string slice of the query results,
-// sorted by timestamp.
+// sorted by timestamp in descending order (newest first).
 func SortByTime(tm ...TimeMap) ([]string, error) {
 	if tm == nil {
 		return nil, fmt.Errorf("can't sort nil TimeMaps")

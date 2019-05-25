@@ -8,15 +8,15 @@ import (
 	"time"
 )
 
-// Data on each user. Used as an entry in the
-// Index wrapper struct's map.
+// Data on each user. Used as an entry in
+// Index.Reg with Data.URL as the key.
 type Data struct {
 	// Provided to aid in concurrency-safe
 	// reads and writes. In most cases, the
-	// "outer" RWMutex in the Index struct
-	// should be used instead. This RWMutex
-	// is provided should the library user need
-	// to access a Data struct concurrently.
+	// "outer" RWMutex in the Index should be
+	// used instead. This RWMutex is provided
+	// should the library user need to access
+	// a Data directly.
 	Mu sync.RWMutex
 
 	// Nick is the user-specified nickname.
@@ -64,7 +64,6 @@ type TimeMap map[time.Time]string
 type TimeSlice []time.Time
 
 // NewUserData returns a pointer to an initialized Data
-// struct.
 func NewUserData() *Data {
 	return &Data{
 		Mu:     sync.RWMutex{},
@@ -72,12 +71,11 @@ func NewUserData() *Data {
 	}
 }
 
-// NewIndex returns an initialized Index and its
-// associated sync.RWMutex
+// NewIndex returns an initialized Index
 func NewIndex() *Index {
 	return &Index{
 		Mu:  sync.RWMutex{},
-		Reg: make(map[string]*Data),
+		Reg: make(map[URLKey]*Data),
 	}
 }
 
@@ -93,8 +91,9 @@ func (t TimeSlice) Len() int {
 }
 
 // Less returns true if the timestamp at index i is after
-// the timestamp at index j in a given TimeSlice. Results
-// in a descending sort order for times.
+// the timestamp at index j in a given TimeSlice. This results
+// in a descending (reversed) sort order for timestamps rather
+// than ascending.
 // This helps satisfy sort.Interface.
 func (t TimeSlice) Less(i, j int) bool {
 	return t[i].After(t[j])

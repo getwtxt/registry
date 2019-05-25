@@ -16,20 +16,20 @@ import (
 // boolean value is false, the fetched URL is a single user's
 // twtxt file. If true, the fetched URL is the output of
 // another registry's /api/plain/tweets. The output of
-// GetTwtxt should be passed to either ParseTwtxt or
+// GetTwtxt should be passed to either ParseUserTwtxt or
 // ParseRegistryTwtxt, respectively.
-func GetTwtxt(urls string) ([]byte, bool, error) {
+func GetTwtxt(urlKey string) ([]byte, bool, error) {
 
 	// Check that we were provided a valid
 	// URL in the first place.
-	if !strings.HasPrefix(urls, "http") {
-		return nil, false, fmt.Errorf("invalid twtxt file url: %v", urls)
+	if !strings.HasPrefix(urlKey, "http") {
+		return nil, false, fmt.Errorf("invalid twtxt file url: %v", urlKey)
 	}
 
 	// Request the data
-	req, err := http.Get(urls)
+	req, err := http.Get(urlKey)
 	if err != nil {
-		return nil, false, fmt.Errorf("couldn't get %v: %v", urls, err)
+		return nil, false, fmt.Errorf("couldn't get %v: %v", urlKey, err)
 	}
 
 	// Verify that we've received text-only content
@@ -42,22 +42,22 @@ func GetTwtxt(urls string) ([]byte, bool, error) {
 		}
 	}
 	if !textplain {
-		return nil, false, fmt.Errorf("received non-text/plain response body from %v", urls)
+		return nil, false, fmt.Errorf("received non-text/plain response body from %v", urlKey)
 	}
 
 	// Make sure the request returned a 200
 	if req.StatusCode != http.StatusOK {
-		return nil, false, fmt.Errorf("didn't get 200 from remote server, received %v: %v", req.StatusCode, urls)
+		return nil, false, fmt.Errorf("didn't get 200 from remote server, received %v: %v", req.StatusCode, urlKey)
 	}
 
 	// Pull the response body into a variable
 	twtxt, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		return nil, false, fmt.Errorf("error reading response body from %v: %v", urls, err)
+		return nil, false, fmt.Errorf("error reading response body from %v: %v", urlKey, err)
 	}
 
 	// Signal that we're adding another twtxt registry as a "user"
-	if strings.HasSuffix(urls, "/api/plain/tweets") {
+	if strings.HasSuffix(urlKey, "/api/plain/tweets") {
 		return twtxt, true, nil
 	}
 
@@ -66,8 +66,8 @@ func GetTwtxt(urls string) ([]byte, bool, error) {
 
 // ParseUserTwtxt takes a fetched twtxt file in the form of
 // a slice of bytes, parses it, and returns it as a
-// TimeMap. The output may then be passed to AddUser()
-func ParseUserTwtxt(twtxt []byte, nick, urls string) (TimeMap, error) {
+// TimeMap. The output may then be passed to Index.AddUser()
+func ParseUserTwtxt(twtxt []byte, nickname, urlKey string) (TimeMap, error) {
 	// Store timestamp parsing errors in a slice
 	// of errors.
 	var erz []byte
@@ -105,7 +105,7 @@ func ParseUserTwtxt(twtxt []byte, nick, urls string) (TimeMap, error) {
 		}
 
 		// Add the status to the TimeMap
-		timemap[thetime] = nick + "\t" + urls + "\t" + nopadding
+		timemap[thetime] = nickname + "\t" + urlKey + "\t" + nopadding
 	}
 	if len(erz) == 0 {
 		return timemap, nil
@@ -113,8 +113,8 @@ func ParseUserTwtxt(twtxt []byte, nick, urls string) (TimeMap, error) {
 	return timemap, fmt.Errorf("%v", erz)
 }
 
-// ParseRegistryTwtxt takes output from another registry and outputs it
-// via a slice of Data objects.
+// ParseRegistryTwtxt takes output from a remote registry and outputs
+// the accessible user data via a slice of Data objects.
 func ParseRegistryTwtxt(twtxt []byte) ([]*Data, error) {
 
 	// Store timestamp parsing errors in a slice
@@ -157,13 +157,13 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*Data, error) {
 			continue
 		}
 
-		parsednick := columns[0]
+		parsednickname := columns[0]
 		dataIndex := 0
 		inIndex := false
 		parsedurl := columns[1]
 
 		for i, e := range userdata {
-			if e.Nick == parsednick || e.URL == parsedurl {
+			if e.Nick == parsednickname || e.URL == parsedurl {
 				dataIndex = i
 				inIndex = true
 				break
@@ -184,7 +184,7 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*Data, error) {
 
 			tmp := &Data{
 				Mu:   sync.RWMutex{},
-				Nick: parsednick,
+				Nick: parsednickname,
 				URL:  parsedurl,
 				Date: timeNowRFC,
 				Status: TimeMap{
