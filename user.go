@@ -53,12 +53,12 @@ func (index *Index) AddUser(nickname, urlKey string, ipAddress net.IP, statuses 
 	return nil
 }
 
-// Push inserts a given *Data into an Index.
-// This can be destructive: an existing *Data
-// in the Index will be overwritten if Data.URL is
-// the same. The *Data being pushed need only
-// have the URL field filled; all other fields may be
-// empty.
+// Push inserts a given Data into an Index. The Data
+// being pushed need only have the URL field filled.
+// All other fields may be empty.
+// This can be destructive: an existing *Data in the
+// Index will be overwritten if its Data.URL is the
+// same as the Data.URL being pushed.
 func (index *Index) Push(userData *Data) error {
 	if userData == nil {
 		return fmt.Errorf("can't push nil data to index")
@@ -77,7 +77,7 @@ func (index *Index) Push(userData *Data) error {
 	return nil
 }
 
-// Pop pulls the *Data from the Index associated with the
+// Pop pulls the Data from the Index associated with the
 // provided URL key.
 func (index *Index) Pop(urlKey string) (*Data, error) {
 	if index == nil {
@@ -167,10 +167,10 @@ func (index *Index) UpdateUser(urlKey string) error {
 	return nil
 }
 
-// ScrapeRemoteRegistry scrapes all nicknames and user URLs
+// CrawlRemoteRegistry scrapes all nicknames and user URLs
 // from a provided registry. The urlKey passed to this function
 // must be in the form of https://registry.example.com/api/plain/users
-func (index *Index) ScrapeRemoteRegistry(urlKey string) error {
+func (index *Index) CrawlRemoteRegistry(urlKey string) error {
 	//fetch the remote registry's entries
 	out, registry, err := GetTwtxt(urlKey)
 	if err != nil {
@@ -179,7 +179,7 @@ func (index *Index) ScrapeRemoteRegistry(urlKey string) error {
 
 	// if we're working with an individual's twtxt file, error out
 	if !registry {
-		return fmt.Errorf("can't add single user via call to ScrapeRemoteRegistry")
+		return fmt.Errorf("can't add single user via call to CrawlRemoteRegistry")
 	}
 
 	// parse the registry's data and add to our Index

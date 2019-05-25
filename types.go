@@ -13,8 +13,8 @@ import (
 type Data struct {
 	// Provided to aid in concurrency-safe
 	// reads and writes. In most cases, the
-	// "outer" RWMutex in the Index should be
-	// used instead. This RWMutex is provided
+	// "outer" mutex in the Index should be
+	// used instead. This mutex is provided
 	// should the library user need to access
 	// a Data directly.
 	Mu sync.RWMutex
@@ -75,7 +75,7 @@ func NewUserData() *Data {
 func NewIndex() *Index {
 	return &Index{
 		Mu:  sync.RWMutex{},
-		Reg: make(map[URLKey]*Data),
+		Reg: make(map[string]*Data),
 	}
 }
 
