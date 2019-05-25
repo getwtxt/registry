@@ -80,7 +80,7 @@ func Benchmark_UserIndex_QueryUser(b *testing.B) {
 		for _, tt := range queryUserCases {
 			_, err := index.QueryUser(tt.term)
 			if err != nil {
-				continue
+				b.Errorf("%v\n", err)
 			}
 		}
 	}
@@ -175,10 +175,10 @@ func Test_UserIndex_QueryInStatus(t *testing.T) {
 			}
 
 			for _, e := range out {
-				split := strings.Split(e, "\t")
+				split := strings.Split(strings.ToLower(e), "\t")
 
 				if e != "" {
-					if !strings.Contains(split[3], tt.substr) {
+					if !strings.Contains(split[3], strings.ToLower(tt.substr)) {
 						t.Errorf("Status without substring returned\n")
 					}
 				}
@@ -207,7 +207,7 @@ func Test_QueryLatestStatuses(t *testing.T) {
 	index := initTestEnv()
 	t.Run("Latest Statuses", func(t *testing.T) {
 		out, err := index.QueryAllStatuses()
-		if out == nil || len(out) > 20 || err != nil {
+		if out == nil || err != nil {
 			t.Errorf("Got no statuses, or more than 20: %v, %v\n", len(out), err)
 		}
 	})
@@ -335,7 +335,7 @@ func Benchmark_SortByTime_Slice(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, err := SortByTime(statusmaps...)
 		if err != nil {
-			continue
+			b.Errorf("%v\n", err)
 		}
 	}
 }
@@ -385,7 +385,7 @@ func Benchmark_SortByTime_Single(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, err := SortByTime(statusmap)
 		if err != nil {
-			continue
+			b.Errorf("%v\n", err)
 		}
 	}
 }
