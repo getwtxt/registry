@@ -8,9 +8,10 @@ import (
 	"time"
 )
 
-// Data on each user. Used as an entry in
-// Index.Reg with Data.URL as the key.
-type Data struct {
+// User holds a given user's information.
+// Used as an entry in Index.Reg with User.URL
+// as the key.
+type User struct {
 	// Provided to aid in concurrency-safe
 	// reads and writes. In most cases, the
 	// "outer" mutex in the Index should be
@@ -50,22 +51,20 @@ type Index struct {
 	// in this map. The functions within this
 	// library expect the key to be the URL of
 	// a given user's twtxt file.
-	Reg map[string]*Data
+	Reg map[string]*User
 }
 
 // TimeMap holds extracted and processed user data as a
-// string. A standard time.Time value is used as the key.
-// The time.Time value is processed from the status's
-// RFC3339 timestamp.
+// string. A time.Time value is used as the key.
 type TimeMap map[time.Time]string
 
 // TimeSlice is a slice of time.Time used for sorting
 // a TimeMap by timestamp.
 type TimeSlice []time.Time
 
-// NewUserData returns a pointer to an initialized Data
-func NewUserData() *Data {
-	return &Data{
+// NewUser returns a pointer to an initialized Data
+func NewUser() *User {
+	return &User{
 		Mu:     sync.RWMutex{},
 		Status: NewTimeMap(),
 	}
@@ -75,7 +74,7 @@ func NewUserData() *Data {
 func NewIndex() *Index {
 	return &Index{
 		Mu:  sync.RWMutex{},
-		Reg: make(map[string]*Data),
+		Reg: make(map[string]*User),
 	}
 }
 

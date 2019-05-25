@@ -117,7 +117,7 @@ func Benchmark_UserIndex_AddUser(b *testing.B) {
 			if err != nil {
 				continue
 			}
-			index.Reg[tt.url] = &Data{}
+			index.Reg[tt.url] = &User{}
 		}
 	}
 }
@@ -186,13 +186,13 @@ func Test_UserIndex_DelUser(t *testing.T) {
 func Benchmark_UserIndex_DelUser(b *testing.B) {
 	index := initTestEnv()
 
-	data1 := &Data{
+	data1 := &User{
 		Nick:   index.Reg[delUserCases[0].url].Nick,
 		Date:   index.Reg[delUserCases[0].url].Date,
 		Status: index.Reg[delUserCases[0].url].Status,
 	}
 
-	data2 := &Data{
+	data2 := &User{
 		Nick:   index.Reg[delUserCases[1].url].Nick,
 		Date:   index.Reg[delUserCases[1].url].Date,
 		Status: index.Reg[delUserCases[1].url].Status,

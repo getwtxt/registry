@@ -94,7 +94,7 @@ func (index *Index) QueryAllStatuses() ([]string, error) {
 
 // FindInStatus takes a user's statuses and looks for a given substring.
 // Returns the statuses that include the substring as a TimeMap.
-func (userdata *Data) FindInStatus(substring string) TimeMap {
+func (userdata *User) FindInStatus(substring string) TimeMap {
 	if userdata == nil {
 		return nil
 	} else if len(substring) > 140 {

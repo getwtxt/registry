@@ -33,7 +33,7 @@ func (index *Index) AddUser(nickname, urlKey string, ipAddress net.IP, statuses 
 
 	// Get the time as both a standard time.Time and as
 	// an RFC3339-formatted timestamp. This will be used
-	// for Data.Date and Data.APIdate to record when the
+	// for User.Date and User.APIdate to record when the
 	// user was added to the index. Ignoring the error
 	// because of the near-nil possibility of it happening
 	thetime := time.Now()
@@ -41,7 +41,7 @@ func (index *Index) AddUser(nickname, urlKey string, ipAddress net.IP, statuses 
 	// Acquire a write lock and load the user data into
 	// our index.
 	index.Mu.Lock()
-	index.Reg[urlKey] = &Data{
+	index.Reg[urlKey] = &User{
 		Mu:     sync.RWMutex{},
 		Nick:   nickname,
 		URL:    urlKey,
@@ -53,33 +53,33 @@ func (index *Index) AddUser(nickname, urlKey string, ipAddress net.IP, statuses 
 	return nil
 }
 
-// Push inserts a given Data into an Index. The Data
+// Push inserts a given User into an Index. The User
 // being pushed need only have the URL field filled.
 // All other fields may be empty.
-// This can be destructive: an existing *Data in the
-// Index will be overwritten if its Data.URL is the
-// same as the Data.URL being pushed.
-func (index *Index) Push(userData *Data) error {
-	if userData == nil {
+// This can be destructive: an existing User in the
+// Index will be overwritten if its User.URL is the
+// same as the User.URL being pushed.
+func (index *Index) Push(user *User) error {
+	if user == nil {
 		return fmt.Errorf("can't push nil data to index")
 	}
 	if index == nil || index.Reg == nil {
 		return fmt.Errorf("can't push data to index: index uninitialized")
 	}
-	if userData.URL == "" {
+	if user.URL == "" {
 		return fmt.Errorf("can't push data to index: missing URL for key")
 	}
-	urlKey := userData.URL
+	urlKey := user.URL
 	index.Mu.Lock()
-	index.Reg[urlKey] = userData
+	index.Reg[urlKey] = user
 	index.Mu.Unlock()
 
 	return nil
 }
 
-// Pop pulls the Data from the Index associated with the
+// Pop pulls the User from the Index associated with the
 // provided URL key.
-func (index *Index) Pop(urlKey string) (*Data, error) {
+func (index *Index) Pop(urlKey string) (*User, error) {
 	if index == nil {
 		return nil, fmt.Errorf("can't pop from nil index")
 	}
@@ -91,10 +91,10 @@ func (index *Index) Pop(urlKey string) (*Data, error) {
 	if _, ok := index.Reg[urlKey]; !ok {
 		return nil, fmt.Errorf("provided url key doesn't exist in index")
 	}
-	userData := index.Reg[urlKey]
+	userUser := index.Reg[urlKey]
 	index.Mu.RUnlock()
 
-	return userData, nil
+	return userUser, nil
 }
 
 // DelUser removes a user and all associated data from

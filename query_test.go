@@ -226,7 +226,7 @@ func Benchmark_QueryLatestStatuses(b *testing.B) {
 // This tests whether we can find a substring in the
 // given user's status messages, disregarding the metadata
 // stored with each status.
-func Test_Data_FindInStatus(t *testing.T) {
+func Test_User_FindInStatus(t *testing.T) {
 	index := initTestEnv()
 	var buf = make([]byte, 256)
 	// read random data into case 8
@@ -238,7 +238,7 @@ func Test_Data_FindInStatus(t *testing.T) {
 	}
 	queryInStatusCases[7].substr = string(buf)
 
-	data := make([]*Data, 0)
+	data := make([]*User, 0)
 
 	for _, v := range index.Reg {
 		data = append(data, v)
@@ -257,9 +257,9 @@ func Test_Data_FindInStatus(t *testing.T) {
 	}
 
 }
-func Benchmark_Data_FindInStatus(b *testing.B) {
+func Benchmark_User_FindInStatus(b *testing.B) {
 	index := initTestEnv()
-	data := make([]*Data, 0)
+	data := make([]*User, 0)
 
 	for _, v := range index.Reg {
 		data = append(data, v)

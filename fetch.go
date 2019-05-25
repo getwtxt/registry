@@ -114,8 +114,8 @@ func ParseUserTwtxt(twtxt []byte, nickname, urlKey string) (TimeMap, error) {
 }
 
 // ParseRegistryTwtxt takes output from a remote registry and outputs
-// the accessible user data via a slice of Data objects.
-func ParseRegistryTwtxt(twtxt []byte) ([]*Data, error) {
+// the accessible user data via a slice of Users.
+func ParseRegistryTwtxt(twtxt []byte) ([]*User, error) {
 
 	// Store timestamp parsing errors in a slice
 	// of errors.
@@ -129,7 +129,7 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*Data, error) {
 	// Set everything up to parse the twtxt file
 	reader := bytes.NewReader(twtxt)
 	scanner := bufio.NewScanner(reader)
-	userdata := []*Data{}
+	userdata := []*User{}
 
 	// Scan the data by linebreak
 	for scanner.Scan() {
@@ -182,7 +182,7 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*Data, error) {
 				erz = append(erz, []byte(fmt.Sprintf("%v\n", err))...)
 			}
 
-			tmp := &Data{
+			tmp := &User{
 				Mu:   sync.RWMutex{},
 				Nick: parsednickname,
 				URL:  parsedurl,

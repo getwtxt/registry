@@ -63,7 +63,7 @@ func initTestEnv() *Index {
 
 	// fill the test index with the mock users
 	for _, e := range mockusers {
-		data := &Data{}
+		data := &User{}
 		data.Nick = e.nick
 		data.Date = e.date
 		data.Status = e.status
