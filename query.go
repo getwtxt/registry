@@ -17,6 +17,7 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 		return nil, fmt.Errorf("can't query empty index for user")
 	}
 
+	term = strings.ToLower(term)
 	timekey := NewTimeMap()
 	keys := make(TimeSlice, 0)
 	var users []string
@@ -27,7 +28,7 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 			// Skip the user if their entry is uninitialized
 			continue
 		}
-		if strings.Contains(v.Nick, term) || strings.Contains(k, term) {
+		if strings.Contains(strings.ToLower(v.Nick), term) || strings.Contains(strings.ToLower(k), term) {
 			thetime, err := time.Parse(time.RFC3339, v.Date)
 			if err != nil {
 				continue
@@ -100,6 +101,7 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 		return nil
 	}
 
+	word = strings.ToLower(word)
 	statuses := NewTimeMap()
 
 	userdata.Mu.RLock()
@@ -108,7 +110,7 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 			continue
 		}
 
-		parts := strings.Split(e, "\t")
+		parts := strings.Split(strings.ToLower(e), "\t")
 		if strings.Contains(parts[3], word) {
 			statuses[k] = e
 		}
@@ -123,12 +125,11 @@ func (userdata *Data) FindInStatus(word string) TimeMap {
 // sorted by timestamp.
 func SortByTime(tm ...TimeMap) ([]string, error) {
 	if tm == nil {
-		return nil, fmt.Errorf("can't sort a nil TimeMap")
-	} else if len(tm) == 0 {
-		return nil, fmt.Errorf("can't sort a zero-length TimeMap")
+		return nil, fmt.Errorf("can't sort nil TimeMaps")
 	}
-	var data []string
+
 	var times = make(TimeSlice, 0)
+	var data []string
 
 	for _, e := range tm {
 		for k := range e {
@@ -140,7 +141,9 @@ func SortByTime(tm ...TimeMap) ([]string, error) {
 
 	for k := range tm {
 		for _, e := range times {
-			data = append(data, tm[k][e])
+			if _, ok := tm[k][e]; ok {
+				data = append(data, tm[k][e])
+			}
 		}
 	}
 
