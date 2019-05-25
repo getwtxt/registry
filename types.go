@@ -17,7 +17,7 @@ type User struct {
 	// "outer" mutex in the Index should be
 	// used instead. This mutex is provided
 	// should the library user need to access
-	// a Data directly.
+	// a User directly.
 	Mu sync.RWMutex
 
 	// Nick is the user-specified nickname.
