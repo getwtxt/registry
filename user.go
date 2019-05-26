@@ -66,19 +66,24 @@ func (index *Index) Push(user *User) error {
 	if index == nil || index.Reg == nil {
 		return fmt.Errorf("can't push data to index: index uninitialized")
 	}
+	user.Mu.RLock()
 	if user.URL == "" {
+		user.Mu.RUnlock()
 		return fmt.Errorf("can't push data to index: missing URL for key")
 	}
 	urlKey := user.URL
 	index.Mu.Lock()
 	index.Reg[urlKey] = user
 	index.Mu.Unlock()
+	user.Mu.RUnlock()
 
 	return nil
 }
 
-// Pop pulls the User from the Index associated with the
-// provided URL key.
+// Pop pulls the User associated with the
+// provided URL key from the Index. It then
+// removes the User from the Index and returns
+// the User.
 func (index *Index) Pop(urlKey string) (*User, error) {
 	if index == nil {
 		return nil, fmt.Errorf("can't pop from nil index")
@@ -89,10 +94,19 @@ func (index *Index) Pop(urlKey string) (*User, error) {
 
 	index.Mu.RLock()
 	if _, ok := index.Reg[urlKey]; !ok {
+		index.Mu.RUnlock()
 		return nil, fmt.Errorf("provided url key doesn't exist in index")
 	}
+
+	index.Reg[urlKey].Mu.RLock()
 	userUser := index.Reg[urlKey]
+	index.Reg[urlKey].Mu.RUnlock()
 	index.Mu.RUnlock()
+
+	index.Mu.Lock()
+	index.Reg[urlKey].Mu.Lock()
+	delete(index.Reg, urlKey)
+	index.Mu.Unlock()
 
 	return userUser, nil
 }
@@ -124,8 +138,12 @@ func (index *Index) DelUser(urlKey string) error {
 	index.Mu.RUnlock()
 
 	// Acquire a write lock and delete the user from
-	// the index.
+	// the index. The User mutex is never unlocked because
+	// the User is deleted. It is only acquired to
+	// prevent a panic if another thread is reading/writing
+	// to the user.
 	index.Mu.Lock()
+	index.Reg[urlKey].Mu.Lock()
 	delete(index.Reg, urlKey)
 	index.Mu.Unlock()
 
@@ -133,7 +151,7 @@ func (index *Index) DelUser(urlKey string) error {
 }
 
 // UpdateUser scrapes an existing user's remote twtxt.txt
-// file. The new statuses are added to the user's entry
+// file. Any new statuses are added to the user's entry
 // in the Index.
 func (index *Index) UpdateUser(urlKey string) error {
 	// fetch the twtxt file data
@@ -150,7 +168,9 @@ func (index *Index) UpdateUser(urlKey string) error {
 	index.Mu.RLock()
 	user := index.Reg[urlKey]
 	index.Mu.RUnlock()
+	user.Mu.RLock()
 	nick := user.Nick
+	user.Mu.RUnlock()
 
 	// update the user's entry in the Index
 	data, err := ParseUserTwtxt(out, nick, urlKey)
@@ -159,9 +179,11 @@ func (index *Index) UpdateUser(urlKey string) error {
 	}
 	index.Mu.Lock()
 	tmp := index.Reg[urlKey]
+	tmp.Mu.Lock()
 	for i, e := range data {
 		tmp.Status[i] = e
 	}
+	tmp.Mu.Unlock()
 	index.Mu.Unlock()
 
 	return nil
@@ -226,7 +248,9 @@ func (index *Index) GetUserStatuses(urlKey string) (TimeMap, error) {
 	}
 
 	// Pull the user's statuses from the index.
+	index.Reg[urlKey].Mu.RLock()
 	status := index.Reg[urlKey].Status
+	index.Reg[urlKey].Mu.RUnlock()
 	index.Mu.RUnlock()
 
 	return status, nil
@@ -249,8 +273,10 @@ func (index *Index) GetStatuses() (TimeMap, error) {
 	// our aggregate TimeMap.
 	index.Mu.RLock()
 	for _, v := range index.Reg {
+		v.Mu.RLock()
 		if v.Status == nil || len(v.Status) == 0 {
 			// Skip a user's statuses if the map is uninitialized or zero length
+			v.Mu.RUnlock()
 			continue
 		}
 		for a, b := range v.Status {
@@ -258,6 +284,7 @@ func (index *Index) GetStatuses() (TimeMap, error) {
 				statuses[a] = b
 			}
 		}
+		v.Mu.RUnlock()
 	}
 	index.Mu.RUnlock()
 

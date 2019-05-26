@@ -28,14 +28,17 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 			// Skip the user if their entry is uninitialized
 			continue
 		}
+		v.Mu.RLock()
 		if strings.Contains(strings.ToLower(v.Nick), term) || strings.Contains(strings.ToLower(k), term) {
 			thetime, err := time.Parse(time.RFC3339, v.Date)
 			if err != nil {
+				v.Mu.RUnlock()
 				continue
 			}
 			timekey[thetime] = v.Nick + "\t" + k + "\t" + v.Date + "\n"
 			keys = append(keys, thetime)
 		}
+		v.Mu.RUnlock()
 	}
 	index.Mu.RUnlock()
 
