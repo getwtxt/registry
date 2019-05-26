@@ -26,22 +26,31 @@ func GetTwtxt(urlKey string) ([]byte, bool, error) {
 		return nil, false, fmt.Errorf("invalid twtxt file url: %v", urlKey)
 	}
 
+	// Set the timeout for all requests
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}
 
+	// Craft a request
+	var b []byte
+	buf := bytes.NewBuffer(b)
+	req, err := http.NewRequest("GET", urlKey, buf)
+	if err != nil {
+		return nil, false, err
+	}
+
 	// Request the data
-	req, err := client.Get(urlKey)
+	res, err := client.Do(req)
 	if err != nil {
 		return nil, false, fmt.Errorf("couldn't get %v: %v", urlKey, err)
 	}
 
-	defer req.Body.Close()
+	defer res.Body.Close()
 
 	// Verify that we've received text-only content
 	// and not something else.
 	var textPlain bool
-	for _, v := range req.Header["Content-Type"] {
+	for _, v := range res.Header["Content-Type"] {
 		if strings.Contains(v, "text/plain") {
 			textPlain = true
 			break
@@ -52,12 +61,12 @@ func GetTwtxt(urlKey string) ([]byte, bool, error) {
 	}
 
 	// Make sure the request returned a 200
-	if req.StatusCode != http.StatusOK {
-		return nil, false, fmt.Errorf("didn't get 200 from remote server, received %v: %v", req.StatusCode, urlKey)
+	if res.StatusCode != http.StatusOK {
+		return nil, false, fmt.Errorf("didn't get 200 from remote server, received %v: %v", res.StatusCode, urlKey)
 	}
 
 	// Pull the response body into a variable
-	twtxt, err := ioutil.ReadAll(req.Body)
+	twtxt, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, false, fmt.Errorf("error reading response body from %v: %v", urlKey, err)
 	}
