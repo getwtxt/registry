@@ -26,22 +26,28 @@ func GetTwtxt(urlKey string) ([]byte, bool, error) {
 		return nil, false, fmt.Errorf("invalid twtxt file url: %v", urlKey)
 	}
 
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
 	// Request the data
-	req, err := http.Get(urlKey)
+	req, err := client.Get(urlKey)
 	if err != nil {
 		return nil, false, fmt.Errorf("couldn't get %v: %v", urlKey, err)
 	}
 
+	defer req.Body.Close()
+
 	// Verify that we've received text-only content
 	// and not something else.
-	var textplain bool
+	var textPlain bool
 	for _, v := range req.Header["Content-Type"] {
 		if strings.Contains(v, "text/plain") {
-			textplain = true
+			textPlain = true
 			break
 		}
 	}
-	if !textplain {
+	if !textPlain {
 		return nil, false, fmt.Errorf("received non-text/plain response body from %v", urlKey)
 	}
 
@@ -107,6 +113,7 @@ func ParseUserTwtxt(twtxt []byte, nickname, urlKey string) (TimeMap, error) {
 		// Add the status to the TimeMap
 		timemap[thetime] = nickname + "\t" + urlKey + "\t" + nopadding
 	}
+
 	if len(erz) == 0 {
 		return timemap, nil
 	}
