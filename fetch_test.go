@@ -44,39 +44,45 @@ var getTwtxtCases = []struct {
 	localOnly bool
 }{
 	{
-		name:      "http://localhost:8080/twtxt.txt",
+		name:      "Constructed Local twtxt.txt",
 		url:       "http://localhost:8080/twtxt.txt",
 		wantErr:   false,
 		localOnly: true,
 	},
 	{
-		name:      "https://example33333333333.com/twtxt.txt",
+		name:      "Inaccessible Site With twtxt.txt",
 		url:       "https://example33333333333.com/twtxt.txt",
 		wantErr:   true,
 		localOnly: false,
 	},
 	{
-		name:      "https://example333333333333.com",
+		name:      "Inaccessible Site Without twtxt.txt",
 		url:       "https://example333333333333.com",
 		wantErr:   true,
 		localOnly: false,
 	},
 	{
-		name:      "file://init_test.go",
+		name:      "Local File Inclusion 1",
 		url:       "file://init_test.go",
 		wantErr:   true,
 		localOnly: false,
 	},
 	{
-		name:      "/etc/passwd",
+		name:      "Local File Inclusion 2",
 		url:       "/etc/passwd",
 		wantErr:   true,
 		localOnly: false,
 	},
 	{
-		name:      "https://example.com/file.cgi",
+		name:      "Remote File Inclusion",
 		url:       "https://example.com/file.cgi",
 		wantErr:   true,
+		localOnly: false,
+	},
+	{
+		name:      "Remote Registry",
+		url:       "https://twtxt.tilde.institute/api/plain/tweets/",
+		wantErr:   false,
 		localOnly: false,
 	},
 	{
@@ -98,7 +104,7 @@ func Test_GetTwtxt(t *testing.T) {
 	if err != nil || n == 0 {
 		t.Errorf("Couldn't set up test: %v\n", err)
 	}
-	getTwtxtCases[6].url = string(buf)
+	getTwtxtCases[7].url = string(buf)
 
 	if !getTwtxtCases[0].localOnly {
 		http.Handle("/twtxt.txt", http.HandlerFunc(twtxtHandler))
