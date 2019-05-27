@@ -4,12 +4,13 @@
 `getwtxt/registry` helps you implement `twtxt` registries in Go.
 It uses no third-party dependencies whatsoever, only the standard library.
 
-This library is currently being debugged via development of `getwtxt`. Until `getwtxt`
-is completed, `registry` should be considered unfit for production use.
+This library is being debugged via development of `getwtxt`. 
+Until `getwtxt` is completed, `registry` should be considered `beta`.
+The current `ETA` for `getwtxt` is 07 June 2019, though it may be completed sooner.
 
 ## Using the Library
 
-You can grab a local copy by issuing:
+You can grab a copy by issuing:
 
 ```
 $ go get -u github.com/getwtxt/registry
@@ -27,7 +28,7 @@ import(
 ## Documentation
 
 The code is commented, so feel free to browse the files themselves. 
-Alternatively, the generated `godoc` can be found at:
+Alternatively, the generated documentation can be found at:
 
 [godoc.org/github.com/getwtxt/registry](https://godoc.org/github.com/getwtxt/registry)
 
@@ -38,10 +39,10 @@ that needs improvement.
 
 ## Notes
 
-I did not tie this to any particular back-end / persistent on-disk storage, so the data
-exists solely in memory.
+* getwtxt - parent project:
+  * [github.com/getwtxt/getwtxt](https://github.com/getwtxt/getwtxt) 
 
-* twtxt: 
+* twtxt documentation: 
   * [twtxt.readthedocs.io/en/latest/](https://twtxt.readthedocs.io/en/latest/)
-* registry documentation:
+* twtxt registry documentation:
   * [twtxt.readthedocs.io/en/latest/user/registry.html](https://twtxt.readthedocs.io/en/latest/user/registry.html)
