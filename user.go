@@ -25,7 +25,7 @@ func (index *Index) AddUser(nickname, urlKey string, ipAddress net.IP, statuses 
 
 	// Check if a user already exists in the index.
 	index.Mu.RLock()
-	if _, ok := index.Reg[urlKey]; ok {
+	if _, ok := index.Users[urlKey]; ok {
 		index.Mu.RUnlock()
 		return fmt.Errorf("user %v already exists", urlKey)
 	}
@@ -41,7 +41,7 @@ func (index *Index) AddUser(nickname, urlKey string, ipAddress net.IP, statuses 
 	// Acquire a write lock and load the user data into
 	// our index.
 	index.Mu.Lock()
-	index.Reg[urlKey] = &User{
+	index.Users[urlKey] = &User{
 		Mu:     sync.RWMutex{},
 		Nick:   nickname,
 		URL:    urlKey,
@@ -63,7 +63,7 @@ func (index *Index) Push(user *User) error {
 	if user == nil {
 		return fmt.Errorf("can't push nil data to index")
 	}
-	if index == nil || index.Reg == nil {
+	if index == nil || index.Users == nil {
 		return fmt.Errorf("can't push data to index: index uninitialized")
 	}
 	user.Mu.RLock()
@@ -73,17 +73,18 @@ func (index *Index) Push(user *User) error {
 	}
 	urlKey := user.URL
 	index.Mu.Lock()
-	index.Reg[urlKey] = user
+	index.Users[urlKey] = user
 	index.Mu.Unlock()
 	user.Mu.RUnlock()
 
 	return nil
 }
 
-// Pop pulls the User associated with the
-// provided URL key from the Index. It then
-// removes the User from the Index and returns
-// the User.
+// Pop returns the User associated with the
+// provided URL key in the Index. Rather
+// than a typical 'pop' operation, such as
+// on a stack, this is non-destructive and
+// leaves the user in the index.
 func (index *Index) Pop(urlKey string) (*User, error) {
 	if index == nil {
 		return nil, fmt.Errorf("can't pop from nil index")
@@ -93,20 +94,15 @@ func (index *Index) Pop(urlKey string) (*User, error) {
 	}
 
 	index.Mu.RLock()
-	if _, ok := index.Reg[urlKey]; !ok {
+	if _, ok := index.Users[urlKey]; !ok {
 		index.Mu.RUnlock()
 		return nil, fmt.Errorf("provided url key doesn't exist in index")
 	}
 
-	index.Reg[urlKey].Mu.RLock()
-	userUser := index.Reg[urlKey]
-	index.Reg[urlKey].Mu.RUnlock()
+	index.Users[urlKey].Mu.RLock()
+	userUser := index.Users[urlKey]
+	index.Users[urlKey].Mu.RUnlock()
 	index.Mu.RUnlock()
-
-	index.Mu.Lock()
-	index.Reg[urlKey].Mu.Lock()
-	delete(index.Reg, urlKey)
-	index.Mu.Unlock()
 
 	return userUser, nil
 }
@@ -131,7 +127,7 @@ func (index *Index) DelUser(urlKey string) error {
 	// Check if the user exists in the index. If
 	// they don't, we can't remove them.
 	index.Mu.RLock()
-	if _, ok := index.Reg[urlKey]; !ok {
+	if _, ok := index.Users[urlKey]; !ok {
 		index.Mu.RUnlock()
 		return fmt.Errorf("can't delete user %v, user doesn't exist", urlKey)
 	}
@@ -143,8 +139,8 @@ func (index *Index) DelUser(urlKey string) error {
 	// prevent a panic if another thread is reading/writing
 	// to the user.
 	index.Mu.Lock()
-	index.Reg[urlKey].Mu.Lock()
-	delete(index.Reg, urlKey)
+	index.Users[urlKey].Mu.Lock()
+	delete(index.Users, urlKey)
 	index.Mu.Unlock()
 
 	return nil
@@ -166,7 +162,7 @@ func (index *Index) UpdateUser(urlKey string) error {
 	}
 
 	index.Mu.RLock()
-	user := index.Reg[urlKey]
+	user := index.Users[urlKey]
 	index.Mu.RUnlock()
 	user.Mu.RLock()
 	nick := user.Nick
@@ -178,7 +174,7 @@ func (index *Index) UpdateUser(urlKey string) error {
 		return err
 	}
 	index.Mu.Lock()
-	tmp := index.Reg[urlKey]
+	tmp := index.Users[urlKey]
 	tmp.Mu.Lock()
 	for i, e := range data {
 		tmp.Status[i] = e
@@ -214,8 +210,8 @@ func (index *Index) CrawlRemoteRegistry(urlKey string) error {
 	// we already have (and lose statuses, etc)
 	index.Mu.Lock()
 	for _, e := range data {
-		if _, ok := index.Reg[e.URL]; !ok {
-			index.Reg[e.URL] = e
+		if _, ok := index.Users[e.URL]; !ok {
+			index.Users[e.URL] = e
 		}
 	}
 	index.Mu.Unlock()
@@ -242,15 +238,15 @@ func (index *Index) GetUserStatuses(urlKey string) (TimeMap, error) {
 	// Check if the user is in the index. If they
 	// aren't, we can't return their statuses.
 	index.Mu.RLock()
-	if _, ok := index.Reg[urlKey]; !ok {
+	if _, ok := index.Users[urlKey]; !ok {
 		index.Mu.RUnlock()
 		return nil, fmt.Errorf("can't retrieve statuses of nonexistent user")
 	}
 
 	// Pull the user's statuses from the index.
-	index.Reg[urlKey].Mu.RLock()
-	status := index.Reg[urlKey].Status
-	index.Reg[urlKey].Mu.RUnlock()
+	index.Users[urlKey].Mu.RLock()
+	status := index.Users[urlKey].Status
+	index.Users[urlKey].Mu.RUnlock()
 	index.Mu.RUnlock()
 
 	return status, nil
@@ -272,7 +268,7 @@ func (index *Index) GetStatuses() (TimeMap, error) {
 	// For each user, assign each status to
 	// our aggregate TimeMap.
 	index.Mu.RLock()
-	for _, v := range index.Reg {
+	for _, v := range index.Users {
 		v.Mu.RLock()
 		if v.Status == nil || len(v.Status) == 0 {
 			// Skip a user's statuses if the map is uninitialized or zero length

@@ -67,7 +67,7 @@ func initTestEnv() *Index {
 		data.Nick = e.nick
 		data.Date = e.date
 		data.Status = e.status
-		index.Reg[e.url] = data
+		index.Users[e.url] = data
 	}
 
 	return index

@@ -51,7 +51,7 @@ type Index struct {
 	// in this map. The functions within this
 	// library expect the key to be the URL of
 	// a given user's twtxt file.
-	Reg map[string]*User
+	Users map[string]*User
 }
 
 // TimeMap holds extracted and processed user data as a
@@ -73,8 +73,8 @@ func NewUser() *User {
 // NewIndex returns an initialized Index
 func NewIndex() *Index {
 	return &Index{
-		Mu:  sync.RWMutex{},
-		Reg: make(map[string]*User),
+		Mu:    sync.RWMutex{},
+		Users: make(map[string]*User),
 	}
 }
 

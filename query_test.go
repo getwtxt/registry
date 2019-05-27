@@ -240,7 +240,7 @@ func Test_User_FindInStatus(t *testing.T) {
 
 	data := make([]*User, 0)
 
-	for _, v := range index.Reg {
+	for _, v := range index.Users {
 		data = append(data, v)
 	}
 
@@ -261,7 +261,7 @@ func Benchmark_User_FindInStatus(b *testing.B) {
 	index := initTestEnv()
 	data := make([]*User, 0)
 
-	for _, v := range index.Reg {
+	for _, v := range index.Users {
 		data = append(data, v)
 	}
 	b.ResetTimer()

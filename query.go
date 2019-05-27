@@ -23,8 +23,8 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 	var users []string
 
 	index.Mu.RLock()
-	for k, v := range index.Reg {
-		if index.Reg[k] == nil {
+	for k, v := range index.Users {
+		if index.Users[k] == nil {
 			// Skip the user if their entry is uninitialized
 			continue
 		}
@@ -62,7 +62,7 @@ func (index *Index) QueryInStatus(substring string) ([]string, error) {
 	statusmap := make([]TimeMap, 0)
 
 	index.Mu.RLock()
-	for _, v := range index.Reg {
+	for _, v := range index.Users {
 		statusmap = append(statusmap, v.FindInStatus(substring))
 	}
 	index.Mu.RUnlock()

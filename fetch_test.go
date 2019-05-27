@@ -14,7 +14,7 @@ func constructTwtxt() []byte {
 	index := initTestEnv()
 	var resp []byte
 	// iterates through each mock user's mock statuses
-	for _, v := range index.Reg {
+	for _, v := range index.Users {
 		for _, e := range v.Status {
 			split := strings.Split(e, "\t")
 			status := []byte(split[2] + "\t" + split[3] + "\n")
