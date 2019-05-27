@@ -20,18 +20,14 @@ import (
 // ParseRegistryTwtxt, respectively.
 func GetTwtxt(urlKey string) ([]byte, bool, error) {
 
-	// Check that we were provided a valid
-	// URL in the first place.
 	if !strings.HasPrefix(urlKey, "http") {
 		return nil, false, fmt.Errorf("invalid twtxt file url: %v", urlKey)
 	}
 
-	// Set the timeout for all requests
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}
 
-	// Craft a request
 	var b []byte
 	buf := bytes.NewBuffer(b)
 	req, err := http.NewRequest("GET", urlKey, buf)
@@ -39,7 +35,6 @@ func GetTwtxt(urlKey string) ([]byte, bool, error) {
 		return nil, false, err
 	}
 
-	// Request the data
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, false, fmt.Errorf("couldn't get %v: %v", urlKey, err)
@@ -60,12 +55,10 @@ func GetTwtxt(urlKey string) ([]byte, bool, error) {
 		return nil, false, fmt.Errorf("received non-text/plain response body from %v", urlKey)
 	}
 
-	// Make sure the request returned a 200
 	if res.StatusCode != http.StatusOK {
 		return nil, false, fmt.Errorf("didn't get 200 from remote server, received %v: %v", res.StatusCode, urlKey)
 	}
 
-	// Pull the response body into a variable
 	twtxt, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, false, fmt.Errorf("error reading response body from %v: %v", urlKey, err)
@@ -87,24 +80,20 @@ func ParseUserTwtxt(twtxt []byte, nickname, urlKey string) (TimeMap, error) {
 	// of errors.
 	var erz []byte
 
-	// Make sure we actually have something to parse
 	if len(twtxt) == 0 {
 		return nil, fmt.Errorf("no data to parse in twtxt file")
 	}
 
-	// Set everything up to parse the twtxt file
 	reader := bytes.NewReader(twtxt)
 	scanner := bufio.NewScanner(reader)
 	timemap := NewTimeMap()
 
-	// Scan the data by linebreak
 	for scanner.Scan() {
 		nopadding := strings.TrimSpace(scanner.Text())
 		if strings.HasPrefix(nopadding, "#") || nopadding == "" {
 			continue
 		}
 
-		// Split the twtxt file into columns by tabs
 		columns := strings.Split(nopadding, "\t")
 		if len(columns) != 2 {
 			return nil, fmt.Errorf("improperly formatted data in twtxt file")
@@ -119,7 +108,6 @@ func ParseUserTwtxt(twtxt []byte, nickname, urlKey string) (TimeMap, error) {
 			erz = append(erz, []byte(fmt.Sprintf("unable to retrieve date: %v\n", err))...)
 		}
 
-		// Add the status to the TimeMap
 		timemap[thetime] = nickname + "\t" + urlKey + "\t" + nopadding
 	}
 
@@ -137,27 +125,22 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*User, error) {
 	// of errors.
 	var erz []byte
 
-	// Make sure we actually have something to parse
 	if len(twtxt) == 0 {
 		return nil, fmt.Errorf("received no data")
 	}
 
-	// Set everything up to parse the twtxt file
 	reader := bytes.NewReader(twtxt)
 	scanner := bufio.NewScanner(reader)
 	userdata := []*User{}
 
-	// Scan the data by linebreak
 	for scanner.Scan() {
 
 		nopadding := strings.TrimSpace(scanner.Text())
 
-		// check if we've happened upon a comment or a blank line
 		if strings.HasPrefix(nopadding, "#") || nopadding == "" {
 			continue
 		}
 
-		// Split the twtxt file into columns by tabs
 		columns := strings.Split(nopadding, "\t")
 		if len(columns) != 4 {
 			return nil, fmt.Errorf("improperly formatted data")

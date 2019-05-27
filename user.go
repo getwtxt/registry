@@ -11,19 +11,16 @@ import (
 // AddUser inserts a new user into the Index.
 func (index *Index) AddUser(nickname, urlKey string, ipAddress net.IP, statuses TimeMap) error {
 
-	// Check that we have an initialized index.
 	if index == nil {
 		return fmt.Errorf("can't add user to uninitialized index")
 
 	} else if nickname == "" || urlKey == "" {
-		// Check that the request is valid.
 		return fmt.Errorf("both URL and Nick must be specified")
 
 	} else if !strings.HasPrefix(urlKey, "http") {
 		return fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	// Check if a user already exists in the index.
 	index.Mu.RLock()
 	if _, ok := index.Users[urlKey]; ok {
 		index.Mu.RUnlock()
@@ -38,8 +35,6 @@ func (index *Index) AddUser(nickname, urlKey string, ipAddress net.IP, statuses 
 	// because of the near-nil possibility of it happening
 	thetime := time.Now()
 
-	// Acquire a write lock and load the user data into
-	// our index.
 	index.Mu.Lock()
 	index.Users[urlKey] = &User{
 		Mu:     sync.RWMutex{},
@@ -111,21 +106,16 @@ func (index *Index) Pop(urlKey string) (*User, error) {
 // the Index.
 func (index *Index) DelUser(urlKey string) error {
 
-	// Check that we have an initialized index.
 	if index == nil {
 		return fmt.Errorf("can't delete user from empty index")
 
 	} else if urlKey == "" {
-		// Check that the request is valid.
 		return fmt.Errorf("can't delete blank user")
 
 	} else if !strings.HasPrefix(urlKey, "http") {
-		// Check that we were provided a URL
 		return fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	// Check if the user exists in the index. If
-	// they don't, we can't remove them.
 	index.Mu.RLock()
 	if _, ok := index.Users[urlKey]; !ok {
 		index.Mu.RUnlock()
@@ -133,8 +123,7 @@ func (index *Index) DelUser(urlKey string) error {
 	}
 	index.Mu.RUnlock()
 
-	// Acquire a write lock and delete the user from
-	// the index. The User mutex is never unlocked because
+	// The User mutex is never unlocked because
 	// the User is deleted. It is only acquired to
 	// prevent a panic if another thread is reading/writing
 	// to the user.
@@ -150,13 +139,11 @@ func (index *Index) DelUser(urlKey string) error {
 // file. Any new statuses are added to the user's entry
 // in the Index.
 func (index *Index) UpdateUser(urlKey string) error {
-	// fetch the twtxt file data
 	out, registry, err := GetTwtxt(urlKey)
 	if err != nil {
 		return err
 	}
 
-	// if we've somehow fetched a registry's data, error out
 	if registry {
 		return fmt.Errorf("attempting to update registry URL - users should be updated individually")
 	}
@@ -168,7 +155,6 @@ func (index *Index) UpdateUser(urlKey string) error {
 	nick := user.Nick
 	user.Mu.RUnlock()
 
-	// update the user's entry in the Index
 	data, err := ParseUserTwtxt(out, nick, urlKey)
 	if err != nil {
 		return err
@@ -189,18 +175,15 @@ func (index *Index) UpdateUser(urlKey string) error {
 // from a provided registry. The urlKey passed to this function
 // must be in the form of https://registry.example.com/api/plain/users
 func (index *Index) CrawlRemoteRegistry(urlKey string) error {
-	//fetch the remote registry's entries
 	out, registry, err := GetTwtxt(urlKey)
 	if err != nil {
 		return err
 	}
 
-	// if we're working with an individual's twtxt file, error out
 	if !registry {
 		return fmt.Errorf("can't add single user via call to CrawlRemoteRegistry")
 	}
 
-	// parse the registry's data and add to our Index
 	data, err := ParseRegistryTwtxt(out)
 	if err != nil {
 		return err
@@ -222,28 +205,22 @@ func (index *Index) CrawlRemoteRegistry(urlKey string) error {
 // GetUserStatuses returns a TimeMap containing single user's statuses
 func (index *Index) GetUserStatuses(urlKey string) (TimeMap, error) {
 
-	// Check that we have an initialized index.
 	if index == nil {
 		return nil, fmt.Errorf("can't get statuses from an empty index")
 
 	} else if urlKey == "" {
-		// Check that the request is valid.
 		return nil, fmt.Errorf("can't retrieve statuses of blank user")
 
 	} else if !strings.HasPrefix(urlKey, "http") {
-		// Check that we were provided a URL
 		return nil, fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	// Check if the user is in the index. If they
-	// aren't, we can't return their statuses.
 	index.Mu.RLock()
 	if _, ok := index.Users[urlKey]; !ok {
 		index.Mu.RUnlock()
 		return nil, fmt.Errorf("can't retrieve statuses of nonexistent user")
 	}
 
-	// Pull the user's statuses from the index.
 	index.Users[urlKey].Mu.RLock()
 	status := index.Users[urlKey].Status
 	index.Users[urlKey].Mu.RUnlock()
@@ -256,22 +233,16 @@ func (index *Index) GetUserStatuses(urlKey string) (TimeMap, error) {
 // from all users in the Index.
 func (index *Index) GetStatuses() (TimeMap, error) {
 
-	// Check that we have an initialized index.
 	if index == nil {
 		return nil, fmt.Errorf("can't get statuses from an empty index")
 	}
 
-	// Initialize a new TimeMap in which we'll
-	// store the statuses.
 	statuses := NewTimeMap()
 
-	// For each user, assign each status to
-	// our aggregate TimeMap.
 	index.Mu.RLock()
 	for _, v := range index.Users {
 		v.Mu.RLock()
 		if v.Status == nil || len(v.Status) == 0 {
-			// Skip a user's statuses if the map is uninitialized or zero length
 			v.Mu.RUnlock()
 			continue
 		}
