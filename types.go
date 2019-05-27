@@ -8,9 +8,8 @@ import (
 	"time"
 )
 
-// User holds a given user's information.
-// Used as an entry in Index.Reg with User.URL
-// as the key.
+// User holds a given user's information
+// and statuses.
 type User struct {
 	// Provided to aid in concurrency-safe
 	// reads and writes. In most cases, the
@@ -27,7 +26,7 @@ type User struct {
 	URL string
 
 	// The IP address of the user is optionally
-	// recorded.
+	// recorded when submitted via POST.
 	IP net.IP
 
 	// The timestamp, in RFC3339 format,
@@ -39,8 +38,8 @@ type User struct {
 	Status TimeMap
 }
 
-// Index provides an index of users. It holds the
-// bulk of the registry data.
+// Index enables the bulk of a registry's
+// user data storage and access.
 type Index struct {
 	// Provided to aid in concurrency-safe
 	// reads and writes to a given registry
