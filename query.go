@@ -25,7 +25,6 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 	index.Mu.RLock()
 	for k, v := range index.Users {
 		if index.Users[k] == nil {
-			// Skip the user if their entry is uninitialized
 			continue
 		}
 		v.Mu.RLock()

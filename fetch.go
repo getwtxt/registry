@@ -42,8 +42,6 @@ func GetTwtxt(urlKey string) ([]byte, bool, error) {
 
 	defer res.Body.Close()
 
-	// Verify that we've received text-only content
-	// and not something else.
 	var textPlain bool
 	for _, v := range res.Header["Content-Type"] {
 		if strings.Contains(v, "text/plain") {
@@ -76,8 +74,6 @@ func GetTwtxt(urlKey string) ([]byte, bool, error) {
 // a slice of bytes, parses it, and returns it as a
 // TimeMap. The output may then be passed to Index.AddUser()
 func ParseUserTwtxt(twtxt []byte, nickname, urlKey string) (TimeMap, error) {
-	// Store timestamp parsing errors in a slice
-	// of errors.
 	var erz []byte
 
 	if len(twtxt) == 0 {
@@ -99,10 +95,6 @@ func ParseUserTwtxt(twtxt []byte, nickname, urlKey string) (TimeMap, error) {
 			return nil, fmt.Errorf("improperly formatted data in twtxt file")
 		}
 
-		// Take the RFC3339 date in the third column
-		// and convert it into a standard time.Time.
-		// If there was a parsing error, keep going,
-		// but take note.
 		thetime, err := time.Parse(time.RFC3339, columns[0])
 		if err != nil {
 			erz = append(erz, []byte(fmt.Sprintf("unable to retrieve date: %v\n", err))...)
@@ -121,8 +113,6 @@ func ParseUserTwtxt(twtxt []byte, nickname, urlKey string) (TimeMap, error) {
 // the accessible user data via a slice of Users.
 func ParseRegistryTwtxt(twtxt []byte) ([]*User, error) {
 
-	// Store timestamp parsing errors in a slice
-	// of errors.
 	var erz []byte
 
 	if len(twtxt) == 0 {
@@ -146,10 +136,6 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*User, error) {
 			return nil, fmt.Errorf("improperly formatted data")
 		}
 
-		// Take the RFC3339 date in the third column
-		// and convert it into a standard time.Time.
-		// If there was a parsing error, keep going
-		// and skip that status.
 		thetime, err := time.Parse(time.RFC3339, columns[2])
 		if err != nil {
 			erz = append(erz, []byte(fmt.Sprintf("%v\n", err))...)
@@ -174,8 +160,6 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*User, error) {
 			tmp.Status[thetime] = nopadding
 			userdata[dataIndex] = tmp
 		} else {
-			// If the user hasn't been seen before,
-			// create a new Data object
 			timeNowRFC := time.Now().Format(time.RFC3339)
 			if err != nil {
 				erz = append(erz, []byte(fmt.Sprintf("%v\n", err))...)

@@ -28,11 +28,6 @@ func (index *Index) AddUser(nickname, urlKey string, ipAddress net.IP, statuses 
 	}
 	index.Mu.RUnlock()
 
-	// Get the time as both a standard time.Time and as
-	// an RFC3339-formatted timestamp. This will be used
-	// for User.Date and User.APIdate to record when the
-	// user was added to the index. Ignoring the error
-	// because of the near-nil possibility of it happening
 	thetime := time.Now()
 
 	index.Mu.Lock()
