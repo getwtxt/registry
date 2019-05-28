@@ -151,6 +151,7 @@ func (index *Index) UpdateUser(urlKey string) error {
 	index.Mu.RLock()
 	user := index.Users[urlKey]
 	index.Mu.RUnlock()
+
 	user.Mu.RLock()
 	nick := user.Nick
 	user.Mu.RUnlock()
@@ -159,13 +160,14 @@ func (index *Index) UpdateUser(urlKey string) error {
 	if err != nil {
 		return err
 	}
-	index.Mu.Lock()
-	tmp := index.Users[urlKey]
-	tmp.Mu.Lock()
+	user.Mu.Lock()
 	for i, e := range data {
-		tmp.Status[i] = e
+		user.Status[i] = e
 	}
-	tmp.Mu.Unlock()
+	user.Mu.Unlock()
+
+	index.Mu.Lock()
+	index.Users[urlKey] = user
 	index.Mu.Unlock()
 
 	return nil
