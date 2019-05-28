@@ -158,8 +158,8 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*User, error) {
 
 		parsednickname := columns[0]
 		dataIndex := 0
-		inIndex := false
 		parsedurl := columns[1]
+		inIndex := false
 
 		for i, e := range userdata {
 			if e.Nick == parsednickname || e.URL == parsedurl {
@@ -193,8 +193,6 @@ func ParseRegistryTwtxt(twtxt []byte) ([]*User, error) {
 
 			userdata = append(userdata, tmp)
 		}
-
-		inIndex = false
 	}
 
 	return userdata, fmt.Errorf("%v", erz)
