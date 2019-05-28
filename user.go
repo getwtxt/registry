@@ -186,7 +186,7 @@ func (index *Index) CrawlRemoteRegistry(urlKey string) error {
 		return fmt.Errorf("can't add single user via call to CrawlRemoteRegistry")
 	}
 
-	data, err := ParseRegistryTwtxt(out)
+	users, err := ParseRegistryTwtxt(out)
 	if err != nil {
 		return err
 	}
@@ -194,7 +194,7 @@ func (index *Index) CrawlRemoteRegistry(urlKey string) error {
 	// only add new users so we don't overwrite data
 	// we already have (and lose statuses, etc)
 	index.Mu.Lock()
-	for _, e := range data {
+	for _, e := range users {
 		if _, ok := index.Users[e.URL]; !ok {
 			index.Users[e.URL] = e
 		}
