@@ -12,19 +12,19 @@ func Test_Integration(t *testing.T) {
 		index := NewIndex()
 
 		t.Logf("Fetching remote twtxt file ...\n")
-		mainregistry, _, err := GetTwtxt("https://enotty.dk/soltempore.txt")
+		mainregistry, _, err := GetTwtxt("https://gbmor.dev/twtxt.txt")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
 
 		t.Logf("Parsing remote twtxt file ...\n")
-		parsed, errz := ParseUserTwtxt(mainregistry, "soltempore", "https://enotty.dk/soltempore.txt")
+		parsed, errz := ParseUserTwtxt(mainregistry, "gbmor", "https://gbmor.dev/twtxt.txt")
 		if errz != nil {
 			t.Errorf("%v\n", errz)
 		}
 
 		t.Logf("Adding new user to index ...\n")
-		err = index.AddUser("TestRegistry", "https://enotty.dk/soltempore.txt", nil, parsed)
+		err = index.AddUser("TestRegistry", "https://gbmor.dev/twtxt.txt", nil, parsed)
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -70,7 +70,7 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Deleting user ...\n")
-		err = index.DelUser("https://enotty.dk/soltempore.txt")
+		err = index.DelUser("https://gbmor.dev/twtxt.txt")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -80,19 +80,19 @@ func Test_Integration(t *testing.T) {
 		index := NewIndex()
 
 		t.Logf("Fetching remote twtxt file ...\n")
-		mainregistry, _, err := GetTwtxt("https://enotty.dk/soltempore.txt")
+		mainregistry, _, err := GetTwtxt("https://gbmor.dev/twtxt.txt")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
 
 		t.Logf("Parsing remote twtxt file ...\n")
-		parsed, errz := ParseUserTwtxt(mainregistry, "soltempore", "https://enotty.dk/soltempore.txt")
+		parsed, errz := ParseUserTwtxt(mainregistry, "gbmor", "https://gbmor.dev/twtxt.txt")
 		if errz != nil {
 			t.Errorf("%v\n", errz)
 		}
 
 		t.Logf("Adding new user to index ...\n")
-		err = index.AddUser("TestRegistry", "https://enotty.dk/soltempore.txt", nil, parsed)
+		err = index.AddUser("TestRegistry", "https://gbmor.dev/twtxt.txt", nil, parsed)
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -138,7 +138,7 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Deleting user ...\n")
-		err = index.DelUser("https://enotty.dk/soltempore.txt")
+		err = index.DelUser("https://gbmor.dev/twtxt.txt")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
