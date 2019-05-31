@@ -106,7 +106,7 @@ func ParseUserTwtxt(twtxt []byte, nickname, urlKey string) (TimeMap, error) {
 	if len(erz) == 0 {
 		return timemap, nil
 	}
-	return timemap, fmt.Errorf("%v", erz)
+	return timemap, fmt.Errorf("%v", string(erz))
 }
 
 // ParseRegistryTwtxt takes output from a remote registry and outputs
