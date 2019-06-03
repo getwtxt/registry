@@ -127,6 +127,26 @@ func (index *Index) Query20Statuses(page int) ([]string, error) {
 	return sorted[beg:end], nil
 }
 
+// ReduceToPage returns the passed 'page' worth of output.
+// One page is twenty items. For example, if 2 is passed,
+// it will return data[20:40]. According to the twtxt
+// registry specification, queries should accept a "page"
+// value.
+func ReduceToPage(page int, data []string) []string {
+	end := 20 * page
+	beg := end - 20
+
+	if end > len(data) || beg < 0 {
+		end = len(data)
+		beg = end - 20
+		if beg < 0 {
+			beg = 0
+		}
+	}
+
+	return data[beg:end]
+}
+
 // FindInStatus takes a user's statuses and looks for a given substring.
 // Returns the statuses that include the substring as a TimeMap.
 func (userdata *User) FindInStatus(substring string) TimeMap {
