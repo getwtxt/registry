@@ -241,7 +241,7 @@ var get20cases = []struct {
 	{
 		name:    "Illegal Page Number",
 		page:    -23,
-		wantErr: true,
+		wantErr: false,
 	},
 }
 
