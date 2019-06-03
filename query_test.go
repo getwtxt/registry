@@ -276,6 +276,20 @@ func Benchmark_UserIndex_Query20Statuses(b *testing.B) {
 	}
 }
 
+func Test_ReduceToPage(t *testing.T) {
+	index := initTestEnv()
+	t.Run("Reducing to Page Sets", func(t *testing.T) {
+		out, err := index.QueryAllStatuses()
+		if err != nil {
+			t.Errorf("%v\n", err.Error())
+		}
+		out = ReduceToPage(1, out)
+		if len(out) > 20 || len(out) == 0 {
+			t.Errorf("Page-Reduce Malfunction: length of data %v\n", len(out))
+		}
+	})
+}
+
 // This tests whether we can find a substring in the
 // given user's status messages, disregarding the metadata
 // stored with each status.
