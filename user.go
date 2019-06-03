@@ -43,13 +43,13 @@ func (index *Index) AddUser(nickname, urlKey string, ipAddress net.IP, statuses 
 	return nil
 }
 
-// Push inserts a given User into an Index. The User
+// Put inserts a given User into an Index. The User
 // being pushed need only have the URL field filled.
 // All other fields may be empty.
 // This can be destructive: an existing User in the
 // Index will be overwritten if its User.URL is the
 // same as the User.URL being pushed.
-func (index *Index) Push(user *User) error {
+func (index *Index) Put(user *User) error {
 	if user == nil {
 		return fmt.Errorf("can't push nil data to index")
 	}
@@ -70,12 +70,9 @@ func (index *Index) Push(user *User) error {
 	return nil
 }
 
-// Pop returns the User associated with the
-// provided URL key in the Index. Rather
-// than a typical 'pop' operation, such as
-// on a stack, this is non-destructive and
-// leaves the user in the index.
-func (index *Index) Pop(urlKey string) (*User, error) {
+// Get returns the User associated with the
+// provided URL key in the Index.
+func (index *Index) Get(urlKey string) (*User, error) {
 	if index == nil {
 		return nil, fmt.Errorf("can't pop from nil index")
 	}
