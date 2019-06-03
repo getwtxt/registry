@@ -94,6 +94,39 @@ func (index *Index) QueryAllStatuses() ([]string, error) {
 	return sorted, nil
 }
 
+// Query20Statuses retrieves a group of twenty statuses from
+// the Index. The status group returned is in chronological
+// order. Passing 1 will retrieve the first "page" of statuses,
+// passing 2 will retrieve the second, etc.
+func (index *Index) Query20Statuses(page int) ([]string, error) {
+	if page < 1 {
+		page = 1
+	}
+
+	statuses, err := index.GetStatuses()
+	if err != nil {
+		return nil, err
+	}
+
+	sorted, err := SortByTime(statuses)
+	if err != nil {
+		return nil, err
+	}
+
+	end := 20 * page
+	beg := end - 20
+
+	if end > len(sorted) || beg < 0 {
+		end = len(sorted)
+		beg = end - 20
+		if beg < 0 {
+			beg = 0
+		}
+	}
+
+	return sorted[beg:end], nil
+}
+
 // FindInStatus takes a user's statuses and looks for a given substring.
 // Returns the statuses that include the substring as a TimeMap.
 func (userdata *User) FindInStatus(substring string) TimeMap {

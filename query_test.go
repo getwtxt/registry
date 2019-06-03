@@ -203,7 +203,7 @@ func Benchmark_UserIndex_QueryInStatus(b *testing.B) {
 
 // Tests whether we can retrieve the 20 most
 // recent statuses in the index
-func Test_QueryLatestStatuses(t *testing.T) {
+func Test_QueryAllStatuses(t *testing.T) {
 	index := initTestEnv()
 	t.Run("Latest Statuses", func(t *testing.T) {
 		out, err := index.QueryAllStatuses()
@@ -212,13 +212,66 @@ func Test_QueryLatestStatuses(t *testing.T) {
 		}
 	})
 }
-func Benchmark_QueryLatestStatuses(b *testing.B) {
+func Benchmark_QueryAllStatuses(b *testing.B) {
 	index := initTestEnv()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := index.QueryAllStatuses()
 		if err != nil {
 			continue
+		}
+	}
+}
+
+var get20cases = []struct {
+	name    string
+	page    int
+	wantErr bool
+}{
+	{
+		name:    "First Page",
+		page:    1,
+		wantErr: false,
+	},
+	{
+		name:    "High Page Number",
+		page:    256,
+		wantErr: false,
+	},
+	{
+		name:    "Illegal Page Number",
+		page:    -23,
+		wantErr: true,
+	},
+}
+
+func Test_UserIndex_Query20Statuses(t *testing.T) {
+	index := initTestEnv()
+	for _, tt := range get20cases {
+		t.Run(tt.name, func(t *testing.T) {
+			out, err := index.Query20Statuses(tt.page)
+			if err != nil && !tt.wantErr {
+				t.Errorf("%v\n", err.Error())
+			}
+			if err == nil && tt.wantErr {
+				t.Errorf("Expecting error, received none\n")
+			}
+			if len(out) > 20 {
+				t.Errorf("Incorrect number of statuses returned.\n")
+			}
+		})
+	}
+}
+
+func Benchmark_UserIndex_Query20Statuses(b *testing.B) {
+	index := initTestEnv()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, tt := range get20cases {
+			_, err := index.Query20Statuses(tt.page)
+			if err != nil && !tt.wantErr {
+				b.Errorf("%v\n", err.Error())
+			}
 		}
 	}
 }
