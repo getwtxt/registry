@@ -133,15 +133,15 @@ func (index *Index) Query20Statuses(page int) ([]string, error) {
 // registry specification, queries should accept a "page"
 // value.
 func ReduceToPage(page int, data []string) []string {
-	end := 20 * page
-	beg := end - 20
 
-	if end > len(data) || beg < 0 {
+	end := 20 * page
+	if end > len(data) {
 		end = len(data)
-		beg = end - 20
-		if beg < 0 {
-			beg = 0
-		}
+	}
+
+	beg := end - 20
+	if beg < 0 {
+		beg = 0
 	}
 
 	return data[beg:end]
