@@ -13,8 +13,7 @@ $ go get -u github.com/getwtxt/registry
 ```
 
 If you're using Go Modules, `go get` is smart enough to snag the most recent 
-tagged version. Subsequent runs of `go get -u` will only update the local copy 
-of the library by minor and patch versions (0.x.x), not major versions (x.0.0).
+tagged version. Subsequent runs of `go get -u` will update the local copy.
 
 Then, in the appropriate source file of your project, include this in your
 `import` statement:
