@@ -25,6 +25,10 @@ type User struct {
 	// The URL of the user's twtxt file
 	URL string
 
+	// The reported Content-Length of the
+	// user's twtxt.txt file.
+	RLen string
+
 	// The IP address of the user is optionally
 	// recorded when submitted via POST.
 	IP net.IP

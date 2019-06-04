@@ -20,26 +20,14 @@ import (
 // ParseRegistryTwtxt, respectively.
 func GetTwtxt(urlKey string) ([]byte, bool, error) {
 
-	if !strings.HasPrefix(urlKey, "http") {
+	if !strings.HasPrefix(urlKey, "http://") && !strings.HasPrefix(urlKey, "https://") {
 		return nil, false, fmt.Errorf("invalid twtxt file url: %v", urlKey)
 	}
 
-	client := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-
-	var b []byte
-	buf := bytes.NewBuffer(b)
-	req, err := http.NewRequest("GET", urlKey, buf)
+	res, err := doReq(urlKey, "GET")
 	if err != nil {
 		return nil, false, err
 	}
-
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, false, fmt.Errorf("couldn't get %v: %v", urlKey, err)
-	}
-
 	defer res.Body.Close()
 
 	var textPlain bool
@@ -68,6 +56,81 @@ func GetTwtxt(urlKey string) ([]byte, bool, error) {
 	}
 
 	return twtxt, false, nil
+}
+
+// DiffTwtxt issues a HEAD request on the user's
+// remote twtxt data. It then checks the Content-Length
+// header. If it's different from the stored result of
+// the previous Content-Length header, update the stored
+// value for a given user and return true.
+// Otherwise, return false. In some error conditions,
+// such as the user not being in the index, it returns true.
+// In other error conditions considered "unrecoverable,"
+// such as the supplied URL being invalid, it returns false.
+func (index *Index) DiffTwtxt(urlKey string) (bool, error) {
+	if !strings.HasPrefix(urlKey, "http://") && !strings.HasPrefix(urlKey, "https://") {
+		return false, fmt.Errorf("invalid URL: %v", urlKey)
+	}
+
+	index.Mu.RLock()
+	index.Users[urlKey].Mu.RLock()
+	user, ok := index.Users[urlKey]
+	if !ok {
+		index.Users[urlKey].Mu.RUnlock()
+		index.Mu.RUnlock()
+		return true, fmt.Errorf("user not in index")
+	}
+	index.Users[urlKey].Mu.RUnlock()
+	index.Mu.RUnlock()
+
+	res, err := doReq(urlKey, "HEAD")
+	if err != nil {
+		return false, err
+	}
+
+	user.Mu.Lock()
+	if contlen, ok := res.Header["Content-Length"]; ok {
+		for _, v := range contlen {
+			if v != "" {
+				if user.RLen != v {
+					user.RLen = v
+					break
+				}
+				if user.RLen == v {
+					user.Mu.Unlock()
+					return false, nil
+				}
+			}
+		}
+	}
+	user.Mu.Unlock()
+
+	index.Mu.Lock()
+	index.Users[urlKey] = user
+	index.Mu.Unlock()
+
+	return true, nil
+}
+
+// internal function. boilerplate for http requests.
+func doReq(urlKey string, method string) (*http.Response, error) {
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	var b []byte
+	buf := bytes.NewBuffer(b)
+	req, err := http.NewRequest(method, urlKey, buf)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't %v %v: %v", method, urlKey, err)
+	}
+
+	return res, nil
 }
 
 // ParseUserTwtxt takes a fetched twtxt file in the form of

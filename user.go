@@ -9,7 +9,7 @@ import (
 )
 
 // AddUser inserts a new user into the Index.
-func (index *Index) AddUser(nickname, urlKey string, ipAddress net.IP, statuses TimeMap) error {
+func (index *Index) AddUser(nickname, urlKey string, rlen string, ipAddress net.IP, statuses TimeMap) error {
 
 	if index == nil {
 		return fmt.Errorf("can't add user to uninitialized index")
@@ -35,6 +35,7 @@ func (index *Index) AddUser(nickname, urlKey string, ipAddress net.IP, statuses 
 		Mu:     sync.RWMutex{},
 		Nick:   nickname,
 		URL:    urlKey,
+		RLen:   rlen,
 		IP:     ipAddress,
 		Date:   thetime.Format(time.RFC3339),
 		Status: statuses}
@@ -115,12 +116,7 @@ func (index *Index) DelUser(urlKey string) error {
 	}
 	index.Mu.RUnlock()
 
-	// The User mutex is never unlocked because
-	// the User is deleted. It is only acquired to
-	// prevent a panic if another thread is reading/writing
-	// to the user.
 	index.Mu.Lock()
-	index.Users[urlKey].Mu.Lock()
 	delete(index.Users, urlKey)
 	index.Mu.Unlock()
 
@@ -129,8 +125,17 @@ func (index *Index) DelUser(urlKey string) error {
 
 // UpdateUser scrapes an existing user's remote twtxt.txt
 // file. Any new statuses are added to the user's entry
-// in the Index.
+// in the Index. If the remote twtxt data's reported
+// Content-Length does not differ from what is stored,
+// an error is returned.
 func (index *Index) UpdateUser(urlKey string) error {
+	diff, err := index.DiffTwtxt(urlKey)
+	if err != nil {
+		return err
+	} else if !diff {
+		return fmt.Errorf("no new statuses available for %v", urlKey)
+	}
+
 	out, registry, err := GetTwtxt(urlKey)
 	if err != nil {
 		return err
@@ -152,6 +157,7 @@ func (index *Index) UpdateUser(urlKey string) error {
 	if err != nil {
 		return err
 	}
+
 	user.Mu.Lock()
 	for i, e := range data {
 		user.Status[i] = e
