@@ -63,7 +63,7 @@ func GetTwtxt(urlKey string) ([]byte, bool, error) {
 	}
 
 	// Signal that we're adding another twtxt registry as a "user"
-	if strings.HasSuffix(urlKey, "/api/plain/tweets") {
+	if strings.HasSuffix(urlKey, "/api/plain/tweets") || strings.HasSuffix(urlKey, "/api/plain/tweets/all") {
 		return twtxt, true, nil
 	}
 
