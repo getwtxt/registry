@@ -245,49 +245,31 @@ var get20cases = []struct {
 	},
 }
 
-func Test_UserIndex_Query20Statuses(t *testing.T) {
+func Test_ReduceToPage(t *testing.T) {
 	index := initTestEnv()
 	for _, tt := range get20cases {
 		t.Run(tt.name, func(t *testing.T) {
-			out, err := index.Query20Statuses(tt.page)
+			out, err := index.QueryAllStatuses()
 			if err != nil && !tt.wantErr {
 				t.Errorf("%v\n", err.Error())
 			}
-			if err == nil && tt.wantErr {
-				t.Errorf("Expecting error, received none\n")
-			}
-			if len(out) > 20 {
-				t.Errorf("Incorrect number of statuses returned.\n")
+			out = ReduceToPage(tt.page, out)
+			if len(out) > 20 || len(out) == 0 {
+				t.Errorf("Page-Reduce Malfunction: length of data %v\n", len(out))
 			}
 		})
 	}
 }
 
-func Benchmark_UserIndex_Query20Statuses(b *testing.B) {
+func Benchmark_ReduceToPage(b *testing.B) {
 	index := initTestEnv()
+	out, _ := index.QueryAllStatuses()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for _, tt := range get20cases {
-			_, err := index.Query20Statuses(tt.page)
-			if err != nil && !tt.wantErr {
-				b.Errorf("%v\n", err.Error())
-			}
+			ReduceToPage(tt.page, out)
 		}
 	}
-}
-
-func Test_ReduceToPage(t *testing.T) {
-	index := initTestEnv()
-	t.Run("Reducing to Page Sets", func(t *testing.T) {
-		out, err := index.QueryAllStatuses()
-		if err != nil {
-			t.Errorf("%v\n", err.Error())
-		}
-		out = ReduceToPage(1, out)
-		if len(out) > 20 || len(out) == 0 {
-			t.Errorf("Page-Reduce Malfunction: length of data %v\n", len(out))
-		}
-	})
 }
 
 // This tests whether we can find a substring in the
