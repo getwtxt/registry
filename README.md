@@ -1,7 +1,11 @@
-# getwtxt/registry [![Build Status](https://travis-ci.com/getwtxt/registry.svg?branch=master)](https://travis-ci.com/getwtxt/registry) [![GoDoc](https://godoc.org/github.com/getwtxt/registry?status.svg)](https://godoc.org/github.com/getwtxt/registry)
-### `twtxt` Registry Library for Go
+# `getwtxt|registry` 
 
-`getwtxt/registry` helps you implement `twtxt` registries in Go.
+[![Build Status](https://travis-ci.com/getwtxt/registry.svg?branch=master)](https://travis-ci.com/getwtxt/registry) 
+&nbsp;&nbsp;[![GoDoc](https://godoc.org/github.com/getwtxt/registry?status.svg)](https://godoc.org/github.com/getwtxt/registry)
+
+### twtxt Registry Library for Go
+
+`getwtxt/registry` helps you implement twtxt registries in Go.
 It uses no third-party dependencies whatsoever, only the standard library.
 
 ## Using the Library
@@ -19,7 +23,7 @@ Then, in the appropriate source file of your project, include this in your
 `import` statement:
 
 ```go
-import(
+import (
   "github.com/getwtxt/registry"
 )
 ```
