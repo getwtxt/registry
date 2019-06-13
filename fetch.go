@@ -19,9 +19,8 @@ import (
 // GetTwtxt should be passed to either ParseUserTwtxt or
 // ParseRegistryTwtxt, respectively.
 func GetTwtxt(urlKey string) ([]byte, bool, error) {
-
 	if !strings.HasPrefix(urlKey, "http://") && !strings.HasPrefix(urlKey, "https://") {
-		return nil, false, fmt.Errorf("invalid twtxt file url: %v", urlKey)
+		return nil, false, fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
 	res, err := doReq(urlKey, "GET")
@@ -72,23 +71,22 @@ func (index *Index) DiffTwtxt(urlKey string) (bool, error) {
 		return false, fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	index.Mu.RLock()
-	index.Users[urlKey].Mu.RLock()
+	index.Mu.Lock()
+	defer index.Mu.Unlock()
+
 	user, ok := index.Users[urlKey]
 	if !ok {
-		index.Users[urlKey].Mu.RUnlock()
-		index.Mu.RUnlock()
 		return true, fmt.Errorf("user not in index")
 	}
-	index.Users[urlKey].Mu.RUnlock()
-	index.Mu.RUnlock()
+
+	user.Mu.Lock()
+	defer user.Mu.Unlock()
 
 	res, err := doReq(urlKey, "HEAD")
 	if err != nil {
 		return false, err
 	}
 
-	user.Mu.Lock()
 	if contlen, ok := res.Header["Content-Length"]; ok {
 		for _, v := range contlen {
 			if v != "" {
@@ -97,17 +95,13 @@ func (index *Index) DiffTwtxt(urlKey string) (bool, error) {
 					break
 				}
 				if user.RLen == v {
-					user.Mu.Unlock()
 					return false, nil
 				}
 			}
 		}
 	}
-	user.Mu.Unlock()
 
-	index.Mu.Lock()
 	index.Users[urlKey] = user
-	index.Mu.Unlock()
 
 	return true, nil
 }
@@ -138,7 +132,6 @@ func doReq(urlKey string, method string) (*http.Response, error) {
 // TimeMap. The output may then be passed to Index.AddUser()
 func ParseUserTwtxt(twtxt []byte, nickname, urlKey string) (TimeMap, error) {
 	var erz []byte
-
 	if len(twtxt) == 0 {
 		return nil, fmt.Errorf("no data to parse in twtxt file")
 	}
@@ -175,9 +168,7 @@ func ParseUserTwtxt(twtxt []byte, nickname, urlKey string) (TimeMap, error) {
 // ParseRegistryTwtxt takes output from a remote registry and outputs
 // the accessible user data via a slice of Users.
 func ParseRegistryTwtxt(twtxt []byte) ([]*User, error) {
-
 	var erz []byte
-
 	if len(twtxt) == 0 {
 		return nil, fmt.Errorf("received no data")
 	}

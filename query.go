@@ -12,7 +12,6 @@ import (
 // are returned sorted by the date they were added to the Index. If
 // the argument provided is blank, return all users.
 func (index *Index) QueryUser(term string) ([]string, error) {
-
 	if index == nil {
 		return nil, fmt.Errorf("can't query empty index for user")
 	}
@@ -23,6 +22,8 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 	var users []string
 
 	index.Mu.RLock()
+	defer index.Mu.RUnlock()
+
 	for k, v := range index.Users {
 		if index.Users[k] == nil {
 			continue
@@ -39,7 +40,6 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 		}
 		v.Mu.RUnlock()
 	}
-	index.Mu.RUnlock()
 
 	sort.Sort(keys)
 	for _, e := range keys {
@@ -61,10 +61,11 @@ func (index *Index) QueryInStatus(substring string) ([]string, error) {
 	statusmap := make([]TimeMap, 0)
 
 	index.Mu.RLock()
+	defer index.Mu.RUnlock()
+
 	for _, v := range index.Users {
 		statusmap = append(statusmap, v.FindInStatus(substring))
 	}
-	index.Mu.RUnlock()
 
 	sorted, err := SortByTime(statusmap...)
 	if err != nil {
@@ -100,7 +101,6 @@ func (index *Index) QueryAllStatuses() ([]string, error) {
 // registry specification, queries should accept a "page"
 // value.
 func ReduceToPage(page int, data []string) []string {
-
 	end := 20 * page
 	if end > len(data) || end < 1 {
 		end = len(data)
@@ -127,6 +127,8 @@ func (userdata *User) FindInStatus(substring string) TimeMap {
 	statuses := NewTimeMap()
 
 	userdata.Mu.RLock()
+	defer userdata.Mu.RUnlock()
+
 	for k, e := range userdata.Status {
 		if _, ok := userdata.Status[k]; !ok {
 			continue
@@ -136,9 +138,7 @@ func (userdata *User) FindInStatus(substring string) TimeMap {
 		if strings.Contains(parts[3], substring) {
 			statuses[k] = e
 		}
-
 	}
-	userdata.Mu.RUnlock()
 
 	return statuses
 }
