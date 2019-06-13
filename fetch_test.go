@@ -136,11 +136,9 @@ func Test_GetTwtxt(t *testing.T) {
 func Benchmark_GetTwtxt(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
-		for _, tt := range getTwtxtCases {
-			_, _, err := GetTwtxt(tt.url)
-			if err != nil {
-				continue
-			}
+		_, _, err := GetTwtxt("https://gbmor.dev/twtxt.txt")
+		if err != nil {
+			continue
 		}
 	}
 }
