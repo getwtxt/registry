@@ -133,9 +133,6 @@ func (index *Index) DelUser(urlKey string) error {
 // in the Index. If the remote twtxt data's reported
 // Content-Length does not differ from what is stored,
 // an error is returned.
-// Additionally, if the *http.Client passed is nil,
-// Registry will use a preconstructed client with a
-// timeout of 10s and all other values set to default.
 func (index *Index) UpdateUser(urlKey string) error {
 	if urlKey == "" || !strings.HasPrefix(urlKey, "http") {
 		return fmt.Errorf("invalid URL: %v", urlKey)
@@ -182,9 +179,6 @@ func (index *Index) UpdateUser(urlKey string) error {
 // CrawlRemoteRegistry scrapes all nicknames and user URLs
 // from a provided registry. The urlKey passed to this function
 // must be in the form of https://registry.example.com/api/plain/users
-// Additionally, if the *http.Client passed is nil,
-// Registry will use a preconstructed client with a
-// timeout of 10s and all other values set to default.
 func (index *Index) CrawlRemoteRegistry(urlKey string) error {
 	if urlKey == "" || !strings.HasPrefix(urlKey, "http") {
 		return fmt.Errorf("invalid URL: %v", urlKey)
