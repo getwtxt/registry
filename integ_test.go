@@ -9,10 +9,10 @@ import (
 func Test_Integration(t *testing.T) {
 	var integration = func(t *testing.T) {
 		t.Logf("Creating index object ...\n")
-		index := NewIndex()
+		index := NewIndex(nil)
 
 		t.Logf("Fetching remote twtxt file ...\n")
-		mainregistry, _, err := GetTwtxt("https://gbmor.dev/twtxt.txt")
+		mainregistry, _, err := GetTwtxt("https://gbmor.dev/twtxt.txt", nil)
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -77,10 +77,10 @@ func Test_Integration(t *testing.T) {
 	}
 	var integration2 = func() {
 		t.Logf("Creating index object ...\n")
-		index := NewIndex()
+		index := NewIndex(nil)
 
 		t.Logf("Fetching remote twtxt file ...\n")
-		mainregistry, _, err := GetTwtxt("https://gbmor.dev/twtxt.txt")
+		mainregistry, _, err := GetTwtxt("https://gbmor.dev/twtxt.txt", nil)
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}

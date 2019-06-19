@@ -18,12 +18,16 @@ import (
 // another registry's /api/plain/tweets. The output of
 // GetTwtxt should be passed to either ParseUserTwtxt or
 // ParseRegistryTwtxt, respectively.
-func GetTwtxt(urlKey string) ([]byte, bool, error) {
+// Generally, the *http.Client inside a given Index should
+// be passed to GetTwtxt. If the *http.Client passed is nil,
+// Registry will use a preconstructed client with a
+// timeout of 10s and all other values set to default.
+func GetTwtxt(urlKey string, client *http.Client) ([]byte, bool, error) {
 	if !strings.HasPrefix(urlKey, "http://") && !strings.HasPrefix(urlKey, "https://") {
 		return nil, false, fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	res, err := doReq(urlKey, "GET")
+	res, err := doReq(urlKey, "GET", client)
 	if err != nil {
 		return nil, false, err
 	}
@@ -82,7 +86,7 @@ func (index *Index) DiffTwtxt(urlKey string) (bool, error) {
 	user.Mu.Lock()
 	defer user.Mu.Unlock()
 
-	res, err := doReq(urlKey, "HEAD")
+	res, err := doReq(urlKey, "HEAD", index.Client)
 	if err != nil {
 		return false, err
 	}
@@ -107,9 +111,14 @@ func (index *Index) DiffTwtxt(urlKey string) (bool, error) {
 }
 
 // internal function. boilerplate for http requests.
-func doReq(urlKey string, method string) (*http.Response, error) {
-	client := &http.Client{
-		Timeout: 10 * time.Second,
+func doReq(urlKey, method string, client *http.Client) (*http.Response, error) {
+	if client == nil {
+		client = &http.Client{
+			Transport:     nil,
+			CheckRedirect: nil,
+			Jar:           nil,
+			Timeout:       10 * time.Second,
+		}
 	}
 
 	var b []byte

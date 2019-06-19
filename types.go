@@ -4,6 +4,7 @@ package registry // import "github.com/getwtxt/registry"
 
 import (
 	"net"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -13,30 +14,24 @@ import (
 type User struct {
 	// Provided to aid in concurrency-safe
 	// reads and writes. In most cases, the
-	// "outer" mutex in the Index should be
+	// mutex in the associated Index should be
 	// used instead. This mutex is provided
 	// should the library user need to access
-	// a User directly.
+	// a User independently of an Index.
 	Mu sync.RWMutex
-
 	// Nick is the user-specified nickname.
 	Nick string
-
 	// The URL of the user's twtxt file
 	URL string
-
 	// The reported Content-Length of the
 	// user's twtxt.txt file.
 	RLen string
-
 	// The IP address of the user is optionally
 	// recorded when submitted via POST.
 	IP net.IP
-
 	// The timestamp, in RFC3339 format,
 	// reflecting when the user was added.
 	Date string
-
 	// A TimeMap of the user's statuses
 	// from their twtxt file.
 	Status TimeMap
@@ -47,14 +42,20 @@ type User struct {
 type Index struct {
 	// Provided to aid in concurrency-safe
 	// reads and writes to a given registry
-	// index instance.
+	// Users map.
 	Mu sync.RWMutex
-
 	// The registry's user data is contained
 	// in this map. The functions within this
 	// library expect the key to be the URL of
 	// a given user's twtxt file.
 	Users map[string]*User
+
+	// The client to use for HTTP requests.
+	// If nil is passed to NewIndex(), a
+	// client with a 10 second timeout
+	// and all other values as default is
+	// used.
+	Client *http.Client
 }
 
 // TimeMap holds extracted and processed user data as a
@@ -74,10 +75,11 @@ func NewUser() *User {
 }
 
 // NewIndex returns an initialized Index
-func NewIndex() *Index {
+func NewIndex(client *http.Client) *Index {
 	return &Index{
-		Mu:    sync.RWMutex{},
-		Users: make(map[string]*User),
+		Mu:     sync.RWMutex{},
+		Users:  make(map[string]*User),
+		Client: client,
 	}
 }
 

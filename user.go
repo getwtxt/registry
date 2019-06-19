@@ -8,8 +8,19 @@ import (
 	"time"
 )
 
+// Indexer implements the minimum amount of methods
+// for a functioning Index.
+type Indexer interface {
+	Put(user *User) error
+	Get(urlKey string) (*User, error)
+	DelUser(urlKey string) error
+	UpdateUser(urlKey string) error
+	GetUserStatuses(urlKey string) (TimeMap, error)
+	GetStatuses() (TimeMap, error)
+}
+
 // AddUser inserts a new user into the Index.
-func (index *Index) AddUser(nickname, urlKey string, rlen string, ipAddress net.IP, statuses TimeMap) error {
+func (index *Index) AddUser(nickname, urlKey, rlen string, ipAddress net.IP, statuses TimeMap) error {
 
 	if index == nil {
 		return fmt.Errorf("can't add user to uninitialized index")
@@ -122,6 +133,9 @@ func (index *Index) DelUser(urlKey string) error {
 // in the Index. If the remote twtxt data's reported
 // Content-Length does not differ from what is stored,
 // an error is returned.
+// Additionally, if the *http.Client passed is nil,
+// Registry will use a preconstructed client with a
+// timeout of 10s and all other values set to default.
 func (index *Index) UpdateUser(urlKey string) error {
 	if urlKey == "" || !strings.HasPrefix(urlKey, "http") {
 		return fmt.Errorf("invalid URL: %v", urlKey)
@@ -134,7 +148,7 @@ func (index *Index) UpdateUser(urlKey string) error {
 		return fmt.Errorf("no new statuses available for %v", urlKey)
 	}
 
-	out, registry, err := GetTwtxt(urlKey)
+	out, registry, err := GetTwtxt(urlKey, index.Client)
 	if err != nil {
 		return err
 	}
@@ -168,12 +182,15 @@ func (index *Index) UpdateUser(urlKey string) error {
 // CrawlRemoteRegistry scrapes all nicknames and user URLs
 // from a provided registry. The urlKey passed to this function
 // must be in the form of https://registry.example.com/api/plain/users
+// Additionally, if the *http.Client passed is nil,
+// Registry will use a preconstructed client with a
+// timeout of 10s and all other values set to default.
 func (index *Index) CrawlRemoteRegistry(urlKey string) error {
 	if urlKey == "" || !strings.HasPrefix(urlKey, "http") {
 		return fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	out, registry, err := GetTwtxt(urlKey)
+	out, registry, err := GetTwtxt(urlKey, index.Client)
 	if err != nil {
 		return err
 	}
