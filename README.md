@@ -48,6 +48,8 @@ that needs improvement.
 * getwtxt - parent project:
   * [github.com/getwtxt/getwtxt](https://github.com/getwtxt/getwtxt) 
 
+* twtxt repository:
+  * [github.com/buckket/twtxt](https://github.com/buckket/twtxt)
 * twtxt documentation: 
   * [twtxt.readthedocs.io/en/latest/](https://twtxt.readthedocs.io/en/latest/)
 * twtxt registry documentation:
