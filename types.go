@@ -19,19 +19,25 @@ type User struct {
 	// should the library user need to access
 	// a User independently of an Index.
 	Mu sync.RWMutex
+
 	// Nick is the user-specified nickname.
 	Nick string
+
 	// The URL of the user's twtxt file
 	URL string
+
 	// The reported Content-Length of the
 	// user's twtxt.txt file.
 	RLen string
+
 	// The IP address of the user is optionally
 	// recorded when submitted via POST.
 	IP net.IP
+
 	// The timestamp, in RFC3339 format,
 	// reflecting when the user was added.
 	Date string
+
 	// A TimeMap of the user's statuses
 	// from their twtxt file.
 	Status TimeMap
@@ -44,6 +50,7 @@ type Index struct {
 	// reads and writes to a given registry
 	// Users map.
 	Mu sync.RWMutex
+
 	// The registry's user data is contained
 	// in this map. The functions within this
 	// library expect the key to be the URL of
