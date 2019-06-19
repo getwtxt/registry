@@ -116,7 +116,7 @@ func Test_GetTwtxt(t *testing.T) {
 			if tt.localOnly {
 				t.Skipf("Local-only test. Skipping ... \n")
 			}
-			out, _, err := GetTwtxt(tt.url)
+			out, _, err := GetTwtxt(tt.url, nil)
 			if tt.wantErr && err == nil {
 				t.Errorf("Expected error: %v\n", tt.url)
 			}
@@ -136,7 +136,7 @@ func Test_GetTwtxt(t *testing.T) {
 func Benchmark_GetTwtxt(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
-		_, _, err := GetTwtxt("https://gbmor.dev/twtxt.txt")
+		_, _, err := GetTwtxt("https://gbmor.dev/twtxt.txt", nil)
 		if err != nil {
 			continue
 		}

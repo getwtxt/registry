@@ -59,7 +59,7 @@ func initTestEnv() *Index {
 			},
 		},
 	}
-	index := NewIndex()
+	index := NewIndex(nil)
 
 	// fill the test index with the mock users
 	for _, e := range mockusers {

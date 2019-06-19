@@ -8,8 +8,19 @@ import (
 	"time"
 )
 
+// Indexer implements the minimum amount of methods
+// for a functioning Index.
+type Indexer interface {
+	Put(user *User) error
+	Get(urlKey string) (*User, error)
+	DelUser(urlKey string) error
+	UpdateUser(urlKey string) error
+	GetUserStatuses(urlKey string) (TimeMap, error)
+	GetStatuses() (TimeMap, error)
+}
+
 // AddUser inserts a new user into the Index.
-func (index *Index) AddUser(nickname, urlKey string, rlen string, ipAddress net.IP, statuses TimeMap) error {
+func (index *Index) AddUser(nickname, urlKey, rlen string, ipAddress net.IP, statuses TimeMap) error {
 
 	if index == nil {
 		return fmt.Errorf("can't add user to uninitialized index")
@@ -134,7 +145,7 @@ func (index *Index) UpdateUser(urlKey string) error {
 		return fmt.Errorf("no new statuses available for %v", urlKey)
 	}
 
-	out, registry, err := GetTwtxt(urlKey)
+	out, registry, err := GetTwtxt(urlKey, index.Client)
 	if err != nil {
 		return err
 	}
@@ -173,7 +184,7 @@ func (index *Index) CrawlRemoteRegistry(urlKey string) error {
 		return fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	out, registry, err := GetTwtxt(urlKey)
+	out, registry, err := GetTwtxt(urlKey, index.Client)
 	if err != nil {
 		return err
 	}
