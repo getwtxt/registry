@@ -9,6 +9,17 @@ import (
 	"time"
 )
 
+// Registrar implements the minimum amount of methods
+// for a functioning Registry.
+type Registrar interface {
+	Put(user *User) error
+	Get(urlKey string) (*User, error)
+	DelUser(urlKey string) error
+	UpdateUser(urlKey string) error
+	GetUserStatuses(urlKey string) (TimeMap, error)
+	GetStatuses() (TimeMap, error)
+}
+
 // User holds a given user's information
 // and statuses.
 type User struct {
@@ -28,7 +39,7 @@ type User struct {
 
 	// The reported Content-Length of the
 	// user's twtxt.txt file.
-	RLen string
+	RemoteContentLength string
 
 	// The IP address of the user is optionally
 	// recorded when submitted via POST.
@@ -43,9 +54,9 @@ type User struct {
 	Status TimeMap
 }
 
-// Index enables the bulk of a registry's
+// Registry enables the bulk of a registry's
 // user data storage and access.
-type Index struct {
+type Registry struct {
 	// Provided to aid in concurrency-safe
 	// reads and writes to a given registry
 	// Users map.
@@ -62,7 +73,7 @@ type Index struct {
 	// client with a 10 second timeout
 	// and all other values as default is
 	// used.
-	Client *http.Client
+	HTTPClient *http.Client
 }
 
 // TimeMap holds extracted and processed user data as a
@@ -81,12 +92,12 @@ func NewUser() *User {
 	}
 }
 
-// NewIndex returns an initialized Index
-func NewIndex(client *http.Client) *Index {
-	return &Index{
-		Mu:     sync.RWMutex{},
-		Users:  make(map[string]*User),
-		Client: client,
+// New returns an initialized Registry instance.
+func New(client *http.Client) *Registry {
+	return &Registry{
+		Mu:         sync.RWMutex{},
+		Users:      make(map[string]*User),
+		HTTPClient: client,
 	}
 }
 

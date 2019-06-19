@@ -8,22 +8,11 @@ import (
 	"time"
 )
 
-// Indexer implements the minimum amount of methods
-// for a functioning Index.
-type Indexer interface {
-	Put(user *User) error
-	Get(urlKey string) (*User, error)
-	DelUser(urlKey string) error
-	UpdateUser(urlKey string) error
-	GetUserStatuses(urlKey string) (TimeMap, error)
-	GetStatuses() (TimeMap, error)
-}
+// AddUser inserts a new user into the Registry.
+func (registry *Registry) AddUser(nickname, urlKey, rlen string, ipAddress net.IP, statuses TimeMap) error {
 
-// AddUser inserts a new user into the Index.
-func (index *Index) AddUser(nickname, urlKey, rlen string, ipAddress net.IP, statuses TimeMap) error {
-
-	if index == nil {
-		return fmt.Errorf("can't add user to uninitialized index")
+	if registry == nil {
+		return fmt.Errorf("can't add user to uninitialized registry")
 
 	} else if nickname == "" || urlKey == "" {
 		return fmt.Errorf("both URL and Nick must be specified")
@@ -32,82 +21,82 @@ func (index *Index) AddUser(nickname, urlKey, rlen string, ipAddress net.IP, sta
 		return fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	index.Mu.Lock()
-	defer index.Mu.Unlock()
+	registry.Mu.Lock()
+	defer registry.Mu.Unlock()
 
-	if _, ok := index.Users[urlKey]; ok {
+	if _, ok := registry.Users[urlKey]; ok {
 		return fmt.Errorf("user %v already exists", urlKey)
 	}
 
-	index.Users[urlKey] = &User{
-		Mu:     sync.RWMutex{},
-		Nick:   nickname,
-		URL:    urlKey,
-		RLen:   rlen,
-		IP:     ipAddress,
-		Date:   time.Now().Format(time.RFC3339),
-		Status: statuses}
+	registry.Users[urlKey] = &User{
+		Mu:                  sync.RWMutex{},
+		Nick:                nickname,
+		URL:                 urlKey,
+		RemoteContentLength: rlen,
+		IP:                  ipAddress,
+		Date:                time.Now().Format(time.RFC3339),
+		Status:              statuses}
 
 	return nil
 }
 
-// Put inserts a given User into an Index. The User
+// Put inserts a given User into an Registry. The User
 // being pushed need only have the URL field filled.
 // All other fields may be empty.
 // This can be destructive: an existing User in the
-// Index will be overwritten if its User.URL is the
+// Registry will be overwritten if its User.URL is the
 // same as the User.URL being pushed.
-func (index *Index) Put(user *User) error {
+func (registry *Registry) Put(user *User) error {
 	if user == nil {
-		return fmt.Errorf("can't push nil data to index")
+		return fmt.Errorf("can't push nil data to registry")
 	}
-	if index == nil || index.Users == nil {
-		return fmt.Errorf("can't push data to index: index uninitialized")
+	if registry == nil || registry.Users == nil {
+		return fmt.Errorf("can't push data to registry: registry uninitialized")
 	}
 	user.Mu.RLock()
 	if user.URL == "" {
 		user.Mu.RUnlock()
-		return fmt.Errorf("can't push data to index: missing URL for key")
+		return fmt.Errorf("can't push data to registry: missing URL for key")
 	}
 	urlKey := user.URL
-	index.Mu.Lock()
-	index.Users[urlKey] = user
-	index.Mu.Unlock()
+	registry.Mu.Lock()
+	registry.Users[urlKey] = user
+	registry.Mu.Unlock()
 	user.Mu.RUnlock()
 
 	return nil
 }
 
 // Get returns the User associated with the
-// provided URL key in the Index.
-func (index *Index) Get(urlKey string) (*User, error) {
-	if index == nil {
-		return nil, fmt.Errorf("can't pop from nil index")
+// provided URL key in the Registry.
+func (registry *Registry) Get(urlKey string) (*User, error) {
+	if registry == nil {
+		return nil, fmt.Errorf("can't pop from nil registry")
 	}
 	if urlKey == "" {
 		return nil, fmt.Errorf("can't pop unless provided a key")
 	}
 
-	index.Mu.RLock()
-	defer index.Mu.RUnlock()
+	registry.Mu.RLock()
+	defer registry.Mu.RUnlock()
 
-	if _, ok := index.Users[urlKey]; !ok {
-		return nil, fmt.Errorf("provided url key doesn't exist in index")
+	if _, ok := registry.Users[urlKey]; !ok {
+		return nil, fmt.Errorf("provided url key doesn't exist in registry")
 	}
 
-	index.Users[urlKey].Mu.RLock()
-	userGot := index.Users[urlKey]
-	index.Users[urlKey].Mu.RUnlock()
+	registry.Users[urlKey].Mu.RLock()
+	userGot := registry.Users[urlKey]
+	registry.Users[urlKey].Mu.RUnlock()
 
 	return userGot, nil
 }
 
 // DelUser removes a user and all associated data from
-// the Index.
-func (index *Index) DelUser(urlKey string) error {
+// the Registry.
+func (registry *Registry) DelUser(urlKey string) error {
 
-	if index == nil {
-		return fmt.Errorf("can't delete user from empty index")
+	if registry == nil {
+		return fmt.Errorf("can't delete user from empty registry")
 
 	} else if urlKey == "" {
 		return fmt.Errorf("can't delete blank user")
@@ -116,47 +105,47 @@ func (index *Index) DelUser(urlKey string) error {
 		return fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	index.Mu.Lock()
-	defer index.Mu.Unlock()
+	registry.Mu.Lock()
+	defer registry.Mu.Unlock()
 
-	if _, ok := index.Users[urlKey]; !ok {
+	if _, ok := registry.Users[urlKey]; !ok {
 		return fmt.Errorf("can't delete user %v, user doesn't exist", urlKey)
 	}
 
-	delete(index.Users, urlKey)
+	delete(registry.Users, urlKey)
 
 	return nil
 }
 
 // UpdateUser scrapes an existing user's remote twtxt.txt
 // file. Any new statuses are added to the user's entry
-// in the Index. If the remote twtxt data's reported
+// in the Registry. If the remote twtxt data's reported
 // Content-Length does not differ from what is stored,
 // an error is returned.
-func (index *Index) UpdateUser(urlKey string) error {
+func (registry *Registry) UpdateUser(urlKey string) error {
 	if urlKey == "" || !strings.HasPrefix(urlKey, "http") {
 		return fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	diff, err := index.DiffTwtxt(urlKey)
+	diff, err := registry.DiffTwtxt(urlKey)
 	if err != nil {
 		return err
 	} else if !diff {
 		return fmt.Errorf("no new statuses available for %v", urlKey)
 	}
 
-	out, registry, err := GetTwtxt(urlKey, index.Client)
+	out, isRemoteRegistry, err := GetTwtxt(urlKey, registry.HTTPClient)
 	if err != nil {
 		return err
 	}
 
-	if registry {
+	if isRemoteRegistry {
 		return fmt.Errorf("attempting to update registry URL - users should be updated individually")
 	}
 
-	index.Mu.Lock()
-	defer index.Mu.Unlock()
-	user := index.Users[urlKey]
+	registry.Mu.Lock()
+	defer registry.Mu.Unlock()
+	user := registry.Users[urlKey]
 
 	user.Mu.Lock()
 	defer user.Mu.Unlock()
@@ -171,7 +160,7 @@ func (index *Index) UpdateUser(urlKey string) error {
 		user.Status[i] = e
 	}
 
-	index.Users[urlKey] = user
+	registry.Users[urlKey] = user
 
 	return nil
 }
@@ -179,17 +168,17 @@ func (index *Index) UpdateUser(urlKey string) error {
 // CrawlRemoteRegistry scrapes all nicknames and user URLs
 // from a provided registry. The urlKey passed to this function
 // must be in the form of https://registry.example.com/api/plain/users
-func (index *Index) CrawlRemoteRegistry(urlKey string) error {
+func (registry *Registry) CrawlRemoteRegistry(urlKey string) error {
 	if urlKey == "" || !strings.HasPrefix(urlKey, "http") {
 		return fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	out, registry, err := GetTwtxt(urlKey, index.Client)
+	out, isRemoteRegistry, err := GetTwtxt(urlKey, registry.HTTPClient)
 	if err != nil {
 		return err
 	}
 
-	if !registry {
+	if !isRemoteRegistry {
 		return fmt.Errorf("can't add single user via call to CrawlRemoteRegistry")
 	}
 
@@ -200,11 +189,11 @@ func (index *Index) CrawlRemoteRegistry(urlKey string) error {
 
 	// only add new users so we don't overwrite data
 	// we already have (and lose statuses, etc)
-	index.Mu.Lock()
-	defer index.Mu.Unlock()
+	registry.Mu.Lock()
+	defer registry.Mu.Unlock()
 	for _, e := range users {
-		if _, ok := index.Users[e.URL]; !ok {
-			index.Users[e.URL] = e
+		if _, ok := registry.Users[e.URL]; !ok {
+			registry.Users[e.URL] = e
 		}
 	}
 
@@ -212,39 +201,39 @@ func (index *Index) CrawlRemoteRegistry(urlKey string) error {
 }
 
 // GetUserStatuses returns a TimeMap containing single user's statuses
-func (index *Index) GetUserStatuses(urlKey string) (TimeMap, error) {
-	if index == nil {
-		return nil, fmt.Errorf("can't get statuses from an empty index")
+func (registry *Registry) GetUserStatuses(urlKey string) (TimeMap, error) {
+	if registry == nil {
+		return nil, fmt.Errorf("can't get statuses from an empty registry")
 	} else if urlKey == "" || !strings.HasPrefix(urlKey, "http") {
 		return nil, fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	index.Mu.RLock()
-	defer index.Mu.RUnlock()
-	if _, ok := index.Users[urlKey]; !ok {
+	registry.Mu.RLock()
+	defer registry.Mu.RUnlock()
+	if _, ok := registry.Users[urlKey]; !ok {
 		return nil, fmt.Errorf("can't retrieve statuses of nonexistent user")
 	}
 
-	index.Users[urlKey].Mu.RLock()
-	status := index.Users[urlKey].Status
-	index.Users[urlKey].Mu.RUnlock()
+	registry.Users[urlKey].Mu.RLock()
+	status := registry.Users[urlKey].Status
+	registry.Users[urlKey].Mu.RUnlock()
 
 	return status, nil
 }
 
 // GetStatuses returns a TimeMap containing all statuses
-// from all users in the Index.
-func (index *Index) GetStatuses() (TimeMap, error) {
-	if index == nil {
-		return nil, fmt.Errorf("can't get statuses from an empty index")
+// from all users in the Registry.
+func (registry *Registry) GetStatuses() (TimeMap, error) {
+	if registry == nil {
+		return nil, fmt.Errorf("can't get statuses from an empty registry")
 	}
 
 	statuses := NewTimeMap()
 
-	index.Mu.RLock()
-	defer index.Mu.RUnlock()
+	registry.Mu.RLock()
+	defer registry.Mu.RUnlock()
 
-	for _, v := range index.Users {
+	for _, v := range registry.Users {
 		v.Mu.RLock()
 		if v.Status == nil || len(v.Status) == 0 {
 			v.Mu.RUnlock()

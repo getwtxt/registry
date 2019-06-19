@@ -7,13 +7,13 @@ import (
 	"time"
 )
 
-// QueryUser checks the Index for usernames
+// QueryUser checks the Registry for usernames
 // or user URLs that contain the term provided as an argument. Entries
-// are returned sorted by the date they were added to the Index. If
+// are returned sorted by the date they were added to the Registry. If
 // the argument provided is blank, return all users.
-func (index *Index) QueryUser(term string) ([]string, error) {
-	if index == nil {
-		return nil, fmt.Errorf("can't query empty index for user")
+func (registry *Registry) QueryUser(term string) ([]string, error) {
+	if registry == nil {
+		return nil, fmt.Errorf("can't query empty registry for user")
 	}
 
 	term = strings.ToLower(term)
@@ -21,11 +21,11 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 	keys := make(TimeSlice, 0)
 	var users []string
 
-	index.Mu.RLock()
-	defer index.Mu.RUnlock()
+	registry.Mu.RLock()
+	defer registry.Mu.RUnlock()
 
-	for k, v := range index.Users {
-		if index.Users[k] == nil {
+	for k, v := range registry.Users {
+		if registry.Users[k] == nil {
 			continue
 		}
 		v.Mu.RLock()
@@ -49,21 +49,21 @@ func (index *Index) QueryUser(term string) ([]string, error) {
 	return users, nil
 }
 
-// QueryInStatus returns all statuses in the Index
+// QueryInStatus returns all statuses in the Registry
 // that contain the provided substring (tag, mention URL, etc).
-func (index *Index) QueryInStatus(substring string) ([]string, error) {
+func (registry *Registry) QueryInStatus(substring string) ([]string, error) {
 	if substring == "" {
 		return nil, fmt.Errorf("cannot query for empty tag")
-	} else if index == nil {
-		return nil, fmt.Errorf("can't query statuses of empty index")
+	} else if registry == nil {
+		return nil, fmt.Errorf("can't query statuses of empty registry")
 	}
 
 	statusmap := make([]TimeMap, 0)
 
-	index.Mu.RLock()
-	defer index.Mu.RUnlock()
+	registry.Mu.RLock()
+	defer registry.Mu.RUnlock()
 
-	for _, v := range index.Users {
+	for _, v := range registry.Users {
 		statusmap = append(statusmap, v.FindInStatus(substring))
 	}
 
@@ -75,14 +75,14 @@ func (index *Index) QueryInStatus(substring string) ([]string, error) {
 	return sorted, nil
 }
 
-// QueryAllStatuses returns all statuses in the Index
+// QueryAllStatuses returns all statuses in the Registry
 // as a slice of strings sorted by timestamp.
-func (index *Index) QueryAllStatuses() ([]string, error) {
-	if index == nil {
-		return nil, fmt.Errorf("can't get latest statuses from empty index")
+func (registry *Registry) QueryAllStatuses() ([]string, error) {
+	if registry == nil {
+		return nil, fmt.Errorf("can't get latest statuses from empty registry")
 	}
 
-	statusmap, err := index.GetStatuses()
+	statusmap, err := registry.GetStatuses()
 	if err != nil {
 		return nil, err
 	}

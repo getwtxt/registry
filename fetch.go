@@ -18,7 +18,7 @@ import (
 // another registry's /api/plain/tweets. The output of
 // GetTwtxt should be passed to either ParseUserTwtxt or
 // ParseRegistryTwtxt, respectively.
-// Generally, the *http.Client inside a given Index should
+// Generally, the *http.Client inside a given Registry instance should
 // be passed to GetTwtxt. If the *http.Client passed is nil,
 // Registry will use a preconstructed client with a
 // timeout of 10s and all other values set to default.
@@ -67,26 +67,26 @@ func GetTwtxt(urlKey string, client *http.Client) ([]byte, bool, error) {
 // the previous Content-Length header, update the stored
 // value for a given user and return true.
 // Otherwise, return false. In some error conditions,
-// such as the user not being in the index, it returns true.
+// such as the user not being in the registry, it returns true.
 // In other error conditions considered "unrecoverable,"
 // such as the supplied URL being invalid, it returns false.
-func (index *Index) DiffTwtxt(urlKey string) (bool, error) {
+func (registry *Registry) DiffTwtxt(urlKey string) (bool, error) {
 	if !strings.HasPrefix(urlKey, "http://") && !strings.HasPrefix(urlKey, "https://") {
 		return false, fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	index.Mu.Lock()
-	defer index.Mu.Unlock()
+	registry.Mu.Lock()
+	defer registry.Mu.Unlock()
 
-	user, ok := index.Users[urlKey]
+	user, ok := registry.Users[urlKey]
 	if !ok {
-		return true, fmt.Errorf("user not in index")
+		return true, fmt.Errorf("user not in registry")
 	}
 
 	user.Mu.Lock()
 	defer user.Mu.Unlock()
 
-	res, err := doReq(urlKey, "HEAD", index.Client)
+	res, err := doReq(urlKey, "HEAD", registry.HTTPClient)
 	if err != nil {
 		return false, err
 	}
@@ -94,18 +94,18 @@ func (index *Index) DiffTwtxt(urlKey string) (bool, error) {
 	if contlen, ok := res.Header["Content-Length"]; ok {
 		for _, v := range contlen {
 			if v != "" {
-				if user.RLen != v {
-					user.RLen = v
+				if user.RemoteContentLength != v {
+					user.RemoteContentLength = v
 					break
 				}
-				if user.RLen == v {
+				if user.RemoteContentLength == v {
 					return false, nil
 				}
 			}
 		}
 	}
 
-	index.Users[urlKey] = user
+	registry.Users[urlKey] = user
 
 	return true, nil
 }
