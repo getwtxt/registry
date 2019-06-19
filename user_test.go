@@ -75,7 +75,7 @@ func Test_Registry_AddUser(t *testing.T) {
 				t.Skipf("Local-only test. Skipping ... ")
 			}
 
-			err := registry.AddUser(tt.nick, tt.url, "", nil, statuses)
+			err := registry.AddUser(tt.nick, tt.url, nil, statuses)
 
 			// only run some checks if we don't want an error
 			if !tt.wantErr {
@@ -113,7 +113,7 @@ func Benchmark_Registry_AddUser(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for _, tt := range addUserCases {
-			err := registry.AddUser(tt.nick, tt.url, "", nil, statuses)
+			err := registry.AddUser(tt.nick, tt.url, nil, statuses)
 			if err != nil {
 				continue
 			}

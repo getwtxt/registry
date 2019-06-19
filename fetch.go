@@ -27,7 +27,7 @@ func GetTwtxt(urlKey string, client *http.Client) ([]byte, bool, error) {
 		return nil, false, fmt.Errorf("invalid URL: %v", urlKey)
 	}
 
-	res, err := doReq(urlKey, "GET", client)
+	res, err := doReq(urlKey, "GET", "", client)
 	if err != nil {
 		return nil, false, err
 	}
@@ -76,42 +76,43 @@ func (registry *Registry) DiffTwtxt(urlKey string) (bool, error) {
 	}
 
 	registry.Mu.Lock()
-	defer registry.Mu.Unlock()
-
 	user, ok := registry.Users[urlKey]
 	if !ok {
 		return true, fmt.Errorf("user not in registry")
 	}
 
 	user.Mu.Lock()
-	defer user.Mu.Unlock()
 
-	res, err := doReq(urlKey, "HEAD", registry.HTTPClient)
+	defer func() {
+		registry.Users[urlKey] = user
+		user.Mu.Unlock()
+		registry.Mu.Unlock()
+	}()
+
+	res, err := doReq(urlKey, "HEAD", user.LastModified, registry.HTTPClient)
 	if err != nil {
 		return false, err
 	}
 
-	if contlen, ok := res.Header["Content-Length"]; ok {
-		for _, v := range contlen {
-			if v != "" {
-				if user.RemoteContentLength != v {
-					user.RemoteContentLength = v
-					break
-				}
-				if user.RemoteContentLength == v {
-					return false, nil
-				}
+	switch res.StatusCode {
+	case http.StatusOK:
+		for _, e := range res.Header["Last-Modified"] {
+			if e != "" {
+				user.LastModified = e
+				break
 			}
 		}
+		return true, nil
+
+	case http.StatusNotModified:
+		return false, nil
 	}
 
-	registry.Users[urlKey] = user
-
-	return true, nil
+	return false, nil
 }
 
 // internal function. boilerplate for http requests.
-func doReq(urlKey, method string, client *http.Client) (*http.Response, error) {
+func doReq(urlKey, method, modTime string, client *http.Client) (*http.Response, error) {
 	if client == nil {
 		client = &http.Client{
 			Transport:     nil,
@@ -126,6 +127,10 @@ func doReq(urlKey, method string, client *http.Client) (*http.Response, error) {
 	req, err := http.NewRequest(method, urlKey, buf)
 	if err != nil {
 		return nil, err
+	}
+
+	if modTime != "" {
+		req.Header.Set("If-Modified-Since", modTime)
 	}
 
 	res, err := client.Do(req)

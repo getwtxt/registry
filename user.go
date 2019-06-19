@@ -9,7 +9,7 @@ import (
 )
 
 // AddUser inserts a new user into the Registry.
-func (registry *Registry) AddUser(nickname, urlKey, rlen string, ipAddress net.IP, statuses TimeMap) error {
+func (registry *Registry) AddUser(nickname, urlKey string, ipAddress net.IP, statuses TimeMap) error {
 
 	if registry == nil {
 		return fmt.Errorf("can't add user to uninitialized registry")
@@ -29,13 +29,13 @@ func (registry *Registry) AddUser(nickname, urlKey, rlen string, ipAddress net.I
 	}
 
 	registry.Users[urlKey] = &User{
-		Mu:                  sync.RWMutex{},
-		Nick:                nickname,
-		URL:                 urlKey,
-		RemoteContentLength: rlen,
-		IP:                  ipAddress,
-		Date:                time.Now().Format(time.RFC3339),
-		Status:              statuses}
+		Mu:           sync.RWMutex{},
+		Nick:         nickname,
+		URL:          urlKey,
+		LastModified: "",
+		IP:           ipAddress,
+		Date:         time.Now().Format(time.RFC3339),
+		Status:       statuses}
 
 	return nil
 }

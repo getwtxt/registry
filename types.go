@@ -37,9 +37,9 @@ type User struct {
 	// The URL of the user's twtxt file
 	URL string
 
-	// The reported Content-Length of the
-	// user's twtxt.txt file.
-	RemoteContentLength string
+	// The reported last modification date
+	// of the user's twtxt.txt file.
+	LastModified string
 
 	// The IP address of the user is optionally
 	// recorded when submitted via POST.

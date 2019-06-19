@@ -24,7 +24,7 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Adding new user to registry ...\n")
-		err = registry.AddUser("TestRegistry", "https://gbmor.dev/twtxt.txt", "", nil, parsed)
+		err = registry.AddUser("TestRegistry", "https://gbmor.dev/twtxt.txt", nil, parsed)
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -92,7 +92,7 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Adding new user to registry ...\n")
-		err = registry.AddUser("TestRegistry", "https://gbmor.dev/twtxt.txt", "", nil, parsed)
+		err = registry.AddUser("TestRegistry", "https://gbmor.dev/twtxt.txt", nil, parsed)
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
