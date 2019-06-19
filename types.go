@@ -73,7 +73,7 @@ type TimeMap map[time.Time]string
 // a TimeMap by timestamp.
 type TimeSlice []time.Time
 
-// NewUser returns a pointer to an initialized Data
+// NewUser returns a pointer to an initialized User
 func NewUser() *User {
 	return &User{
 		Mu:     sync.RWMutex{},
