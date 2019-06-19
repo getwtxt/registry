@@ -6,7 +6,10 @@
 ### twtxt Registry Library for Go
 
 `getwtxt/registry` helps you implement twtxt registries in Go.
-It uses no third-party dependencies whatsoever, only the standard library.
+It uses no third-party dependencies whatsoever, only the standard library,
+and has no global state.
+Specifying your own `http.Client` for requests is encouraged, with a sensible
+default available by passing `nil` to the constructor.
 
 ## Using the Library
 
