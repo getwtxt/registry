@@ -35,10 +35,10 @@ var queryUserCases = []struct {
 	},
 }
 
-// Checks if UserIndex.QueryUser() returns users that
+// Checks if Registry.QueryUser() returns users that
 // match the provided substring.
-func Test_UserIndex_QueryUser(t *testing.T) {
-	index := initTestEnv()
+func Test_Registry_QueryUser(t *testing.T) {
+	registry := initTestEnv()
 	var buf = make([]byte, 256)
 	// read random data into case 8
 	rando, _ := os.Open("/dev/random")
@@ -52,7 +52,7 @@ func Test_UserIndex_QueryUser(t *testing.T) {
 	for n, tt := range queryUserCases {
 
 		t.Run(tt.name, func(t *testing.T) {
-			out, err := index.QueryUser(tt.term)
+			out, err := registry.QueryUser(tt.term)
 
 			if out == nil && err != nil && !tt.wantErr {
 				t.Errorf("Received nil output or an error when unexpected. Case %v, %v, %v\n", n, tt.term, err)
@@ -72,13 +72,13 @@ func Test_UserIndex_QueryUser(t *testing.T) {
 		})
 	}
 }
-func Benchmark_UserIndex_QueryUser(b *testing.B) {
-	index := initTestEnv()
+func Benchmark_Registry_QueryUser(b *testing.B) {
+	registry := initTestEnv()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range queryUserCases {
-			_, err := index.QueryUser(tt.term)
+			_, err := registry.QueryUser(tt.term)
 			if err != nil {
 				b.Errorf("%v\n", err)
 			}
@@ -145,8 +145,8 @@ var queryInStatusCases = []struct {
 // This tests whether we can find a substring in all of
 // the known status messages, disregarding the metadata
 // stored with each status.
-func Test_UserIndex_QueryInStatus(t *testing.T) {
-	index := initTestEnv()
+func Test_Registry_QueryInStatus(t *testing.T) {
+	registry := initTestEnv()
 	var buf = make([]byte, 256)
 	// read random data into case 8
 	rando, _ := os.Open("/dev/random")
@@ -161,7 +161,7 @@ func Test_UserIndex_QueryInStatus(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 
-			out, err := index.QueryInStatus(tt.substr)
+			out, err := registry.QueryInStatus(tt.substr)
 			if err != nil && !tt.wantErr {
 				t.Errorf("Caught unexpected error: %v\n", err)
 			}
@@ -187,13 +187,13 @@ func Test_UserIndex_QueryInStatus(t *testing.T) {
 	}
 
 }
-func Benchmark_UserIndex_QueryInStatus(b *testing.B) {
-	index := initTestEnv()
+func Benchmark_Registry_QueryInStatus(b *testing.B) {
+	registry := initTestEnv()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
 		for _, tt := range queryInStatusCases {
-			_, err := index.QueryInStatus(tt.substr)
+			_, err := registry.QueryInStatus(tt.substr)
 			if err != nil {
 				continue
 			}
@@ -202,21 +202,21 @@ func Benchmark_UserIndex_QueryInStatus(b *testing.B) {
 }
 
 // Tests whether we can retrieve the 20 most
-// recent statuses in the index
+// recent statuses in the registry
 func Test_QueryAllStatuses(t *testing.T) {
-	index := initTestEnv()
+	registry := initTestEnv()
 	t.Run("Latest Statuses", func(t *testing.T) {
-		out, err := index.QueryAllStatuses()
+		out, err := registry.QueryAllStatuses()
 		if out == nil || err != nil {
 			t.Errorf("Got no statuses, or more than 20: %v, %v\n", len(out), err)
 		}
 	})
 }
 func Benchmark_QueryAllStatuses(b *testing.B) {
-	index := initTestEnv()
+	registry := initTestEnv()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := index.QueryAllStatuses()
+		_, err := registry.QueryAllStatuses()
 		if err != nil {
 			continue
 		}
@@ -246,10 +246,10 @@ var get20cases = []struct {
 }
 
 func Test_ReduceToPage(t *testing.T) {
-	index := initTestEnv()
+	registry := initTestEnv()
 	for _, tt := range get20cases {
 		t.Run(tt.name, func(t *testing.T) {
-			out, err := index.QueryAllStatuses()
+			out, err := registry.QueryAllStatuses()
 			if err != nil && !tt.wantErr {
 				t.Errorf("%v\n", err.Error())
 			}
@@ -262,8 +262,8 @@ func Test_ReduceToPage(t *testing.T) {
 }
 
 func Benchmark_ReduceToPage(b *testing.B) {
-	index := initTestEnv()
-	out, _ := index.QueryAllStatuses()
+	registry := initTestEnv()
+	out, _ := registry.QueryAllStatuses()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for _, tt := range get20cases {
@@ -276,7 +276,7 @@ func Benchmark_ReduceToPage(b *testing.B) {
 // given user's status messages, disregarding the metadata
 // stored with each status.
 func Test_User_FindInStatus(t *testing.T) {
-	index := initTestEnv()
+	registry := initTestEnv()
 	var buf = make([]byte, 256)
 	// read random data into case 8
 	rando, _ := os.Open("/dev/random")
@@ -289,7 +289,7 @@ func Test_User_FindInStatus(t *testing.T) {
 
 	data := make([]*User, 0)
 
-	for _, v := range index.Users {
+	for _, v := range registry.Users {
 		data = append(data, v)
 	}
 
@@ -307,10 +307,10 @@ func Test_User_FindInStatus(t *testing.T) {
 
 }
 func Benchmark_User_FindInStatus(b *testing.B) {
-	index := initTestEnv()
+	registry := initTestEnv()
 	data := make([]*User, 0)
 
-	for _, v := range index.Users {
+	for _, v := range registry.Users {
 		data = append(data, v)
 	}
 	b.ResetTimer()
@@ -325,9 +325,9 @@ func Benchmark_User_FindInStatus(b *testing.B) {
 }
 
 func Test_SortByTime_Slice(t *testing.T) {
-	index := initTestEnv()
+	registry := initTestEnv()
 
-	statusmap, err := index.GetStatuses()
+	statusmap, err := registry.GetStatuses()
 	if err != nil {
 		t.Errorf("Failed to finish test initialization: %v\n", err)
 	}
@@ -365,14 +365,14 @@ func Benchmark_SortByTime_Slice(b *testing.B) {
 	// my laptop. Oops.
 	sortMultiplier := 250
 	b.Logf("Benchmarking SortByTime with a constructed slice of %v statuses ...\n", sortMultiplier*4)
-	index := initTestEnv()
+	registry := initTestEnv()
 
-	statusmap, err := index.GetStatuses()
+	statusmap, err := registry.GetStatuses()
 	if err != nil {
 		b.Errorf("Failed to finish benchmark initialization: %v\n", err)
 	}
 
-	// Constructed index has four statuses. This
+	// Constructed registry has four statuses. This
 	// makes a TimeMapSlice of 1000000 statuses.
 	statusmaps := make([]TimeMap, sortMultiplier*4)
 	for i := 0; i < sortMultiplier; i++ {
@@ -390,9 +390,9 @@ func Benchmark_SortByTime_Slice(b *testing.B) {
 }
 
 func Test_SortByTime_Single(t *testing.T) {
-	index := initTestEnv()
+	registry := initTestEnv()
 
-	statusmap, err := index.GetStatuses()
+	statusmap, err := registry.GetStatuses()
 	if err != nil {
 		t.Errorf("Failed to finish test initialization: %v\n", err)
 	}
@@ -422,9 +422,9 @@ func Test_SortByTime_Single(t *testing.T) {
 }
 
 func Benchmark_SortByTime_Single(b *testing.B) {
-	index := initTestEnv()
+	registry := initTestEnv()
 
-	statusmap, err := index.GetStatuses()
+	statusmap, err := registry.GetStatuses()
 	if err != nil {
 		b.Errorf("Failed to finish benchmark initialization: %v\n", err)
 	}

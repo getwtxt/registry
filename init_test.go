@@ -14,7 +14,7 @@ func quickErr(err error) {
 }
 
 // Sets up mock users and statuses
-func initTestEnv() *Index {
+func initTestEnv() *Registry {
 	hush, err := os.Open("/dev/null")
 	quickErr(err)
 	log.SetOutput(hush)
@@ -59,16 +59,16 @@ func initTestEnv() *Index {
 			},
 		},
 	}
-	index := NewIndex(nil)
+	registry := New(nil)
 
-	// fill the test index with the mock users
+	// fill the test registry with the mock users
 	for _, e := range mockusers {
 		data := &User{}
 		data.Nick = e.nick
 		data.Date = e.date
 		data.Status = e.status
-		index.Users[e.url] = data
+		registry.Users[e.url] = data
 	}
 
-	return index
+	return registry
 }

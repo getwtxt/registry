@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-// This tests all the operations on an index.
+// This tests all the operations on an registry.
 func Test_Integration(t *testing.T) {
 	var integration = func(t *testing.T) {
-		t.Logf("Creating index object ...\n")
-		index := NewIndex(nil)
+		t.Logf("Creating registry object ...\n")
+		registry := New(nil)
 
 		t.Logf("Fetching remote twtxt file ...\n")
 		mainregistry, _, err := GetTwtxt("https://gbmor.dev/twtxt.txt", nil)
@@ -23,14 +23,14 @@ func Test_Integration(t *testing.T) {
 			t.Errorf("%v\n", errz)
 		}
 
-		t.Logf("Adding new user to index ...\n")
-		err = index.AddUser("TestRegistry", "https://gbmor.dev/twtxt.txt", "", nil, parsed)
+		t.Logf("Adding new user to registry ...\n")
+		err = registry.AddUser("TestRegistry", "https://gbmor.dev/twtxt.txt", "", nil, parsed)
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
 
 		t.Logf("Querying user statuses ...\n")
-		queryuser, err := index.QueryUser("TestRegistry")
+		queryuser, err := registry.QueryUser("TestRegistry")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -41,7 +41,7 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Querying for keyword in statuses ...\n")
-		querystatus, err := index.QueryInStatus("morning")
+		querystatus, err := registry.QueryInStatus("morning")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -52,7 +52,7 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Querying for all statuses ...\n")
-		allstatus, err := index.QueryAllStatuses()
+		allstatus, err := registry.QueryAllStatuses()
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -61,7 +61,7 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Querying for all users ...\n")
-		allusers, err := index.QueryUser("")
+		allusers, err := registry.QueryUser("")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -70,14 +70,14 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Deleting user ...\n")
-		err = index.DelUser("https://gbmor.dev/twtxt.txt")
+		err = registry.DelUser("https://gbmor.dev/twtxt.txt")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
 	}
 	var integration2 = func() {
-		t.Logf("Creating index object ...\n")
-		index := NewIndex(nil)
+		t.Logf("Creating registry object ...\n")
+		registry := New(nil)
 
 		t.Logf("Fetching remote twtxt file ...\n")
 		mainregistry, _, err := GetTwtxt("https://gbmor.dev/twtxt.txt", nil)
@@ -91,14 +91,14 @@ func Test_Integration(t *testing.T) {
 			t.Errorf("%v\n", errz)
 		}
 
-		t.Logf("Adding new user to index ...\n")
-		err = index.AddUser("TestRegistry", "https://gbmor.dev/twtxt.txt", "", nil, parsed)
+		t.Logf("Adding new user to registry ...\n")
+		err = registry.AddUser("TestRegistry", "https://gbmor.dev/twtxt.txt", "", nil, parsed)
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
 
 		t.Logf("Querying user statuses ...\n")
-		queryuser, err := index.QueryUser("TestRegistry")
+		queryuser, err := registry.QueryUser("TestRegistry")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -109,7 +109,7 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Querying for keyword in statuses ...\n")
-		querystatus, err := index.QueryInStatus("morning")
+		querystatus, err := registry.QueryInStatus("morning")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -120,7 +120,7 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Querying for all statuses ...\n")
-		allstatus, err := index.QueryAllStatuses()
+		allstatus, err := registry.QueryAllStatuses()
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -129,7 +129,7 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Querying for all users ...\n")
-		allusers, err := index.QueryUser("")
+		allusers, err := registry.QueryUser("")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
@@ -138,7 +138,7 @@ func Test_Integration(t *testing.T) {
 		}
 
 		t.Logf("Deleting user ...\n")
-		err = index.DelUser("https://gbmor.dev/twtxt.txt")
+		err = registry.DelUser("https://gbmor.dev/twtxt.txt")
 		if err != nil {
 			t.Errorf("%v\n", err)
 		}
