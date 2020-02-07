@@ -185,7 +185,8 @@ func ParseUserTwtxt(twtxt []byte, nickname, urlKey string) (TimeMap, error) {
 			return nil, fmt.Errorf("improperly formatted data in twtxt file")
 		}
 
-		thetime, err := time.Parse(time.RFC3339, columns[0])
+		normalizedDatestamp := fixTimestamp(columns[0])
+		thetime, err := time.Parse(time.RFC3339, normalizedDatestamp)
 		if err != nil {
 			erz = append(erz, []byte(fmt.Sprintf("unable to retrieve date: %v\n", err))...)
 		}
