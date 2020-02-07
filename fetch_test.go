@@ -176,7 +176,7 @@ var parseTwtxtCases = []struct {
 	},
 	{
 		name:      "Incorrectly formatted date",
-		data:      []byte("foo_barrington\thttps://example3.com/twtxt.txt\t2019 April 23rd\tI love twtxt!!!11"),
+		data:      []byte("2019 April 23rd\tI love twtxt!!!11"),
 		wantErr:   true,
 		localOnly: false,
 	},
@@ -184,6 +184,12 @@ var parseTwtxtCases = []struct {
 		name:      "No data",
 		data:      []byte{},
 		wantErr:   true,
+		localOnly: false,
+	},
+	{
+		name:      "Variant rfc3339 datestamp",
+		data:      []byte("2020-02-04T21:28:21.868659+00:00\tWill this work?"),
+		wantErr:   false,
 		localOnly: false,
 	},
 	{
@@ -204,7 +210,7 @@ func Test_ParseUserTwtxt(t *testing.T) {
 	if err != nil || n == 0 {
 		t.Errorf("Couldn't set up test: %v\n", err)
 	}
-	parseTwtxtCases[3].data = buf
+	parseTwtxtCases[4].data = buf
 
 	for _, tt := range parseTwtxtCases {
 		if tt.localOnly {
@@ -248,5 +254,33 @@ func Benchmark_ParseUserTwtxt(b *testing.B) {
 		for _, tt := range parseTwtxtCases {
 			_, _ = ParseUserTwtxt(tt.data, "testuser", "testurl")
 		}
+	}
+}
+
+var timestampCases = []struct {
+	name     string
+	orig     string
+	expected string
+}{
+	{
+		name:     "Timezone appended",
+		orig:     "2020-01-13T16:08:25.544735+00:00",
+		expected: "2020-01-13T16:08:25.544735Z",
+	},
+	{
+		name:     "It's fine already",
+		orig:     "2020-01-14T00:19:45.092344Z",
+		expected: "2020-01-14T00:19:45.092344Z",
+	},
+}
+
+func Test_fixTimestamp(t *testing.T) {
+	for _, tt := range timestampCases {
+		t.Run(tt.name, func(t *testing.T) {
+			tsout := fixTimestamp(tt.orig)
+			if tsout != tt.expected {
+				t.Errorf("Failed :: %s :: got %s expected %s", tt.name, tsout, tt.expected)
+			}
+		})
 	}
 }
