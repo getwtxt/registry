@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -196,6 +197,11 @@ func ParseUserTwtxt(twtxt []byte, nickname, urlKey string) (TimeMap, error) {
 		return timemap, nil
 	}
 	return timemap, fmt.Errorf("%v", string(erz))
+}
+
+func fixTimestamp(ts string) string {
+	normalizeTimestamp := regexp.MustCompile(`[\+][\d][\d][:][\d][\d]`)
+	return strings.TrimSpace(normalizeTimestamp.ReplaceAllString(ts, "Z"))
 }
 
 // ParseRegistryTwtxt takes output from a remote registry and outputs

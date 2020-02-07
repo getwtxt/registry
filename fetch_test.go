@@ -250,3 +250,31 @@ func Benchmark_ParseUserTwtxt(b *testing.B) {
 		}
 	}
 }
+
+var timestampCases = []struct {
+	name     string
+	orig     string
+	expected string
+}{
+	{
+		name:     "Timezone appended",
+		orig:     "2020-01-13T16:08:25.544735+00:00",
+		expected: "2020-01-13T16:08:25.544735Z",
+	},
+	{
+		name:     "It's fine already",
+		orig:     "2020-01-14T00:19:45.092344Z",
+		expected: "2020-01-14T00:19:45.092344Z",
+	},
+}
+
+func Test_fixTimestamp(t *testing.T) {
+	for _, tt := range timestampCases {
+		t.Run(tt.name, func(t *testing.T) {
+			tsout := fixTimestamp(tt.orig)
+			if tsout != tt.expected {
+				t.Errorf("Failed :: %s :: got %s expected %s", tt.name, tsout, tt.expected)
+			}
+		})
+	}
+}
