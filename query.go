@@ -111,6 +111,10 @@ func (registry *Registry) QueryAllStatuses() ([]string, error) {
 		return nil, err
 	}
 
+	if sorted == nil {
+		sorted = make([]string, 1)
+	}
+
 	return sorted, nil
 }
 
