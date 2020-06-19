@@ -1,0 +1,10 @@
+image: alpine/edge
+packages:
+  - go
+sources:
+  - https://git.sr.ht/~gbmor/getwtxt-registry
+tasks:
+  - build: |
+      cd getwtxt-registry
+      go test -v
+      go test -v --bench . --benchmem

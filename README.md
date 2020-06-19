@@ -1,11 +1,10 @@
-# `getwtxt|registry` 
+# `getwtxt-registry` 
 
-[![Build Status](https://travis-ci.com/getwtxt/registry.svg?branch=master)](https://travis-ci.com/getwtxt/registry) 
-&nbsp;&nbsp;[![GoDoc](https://godoc.org/github.com/getwtxt/registry?status.svg)](https://godoc.org/github.com/getwtxt/registry)
+[![builds.sr.ht status](https://builds.sr.ht/~gbmor/getwtxt-registry.svg)](https://builds.sr.ht/~gbmor/getwtxt-registry?) [![Build Status](https://travis-ci.com/getwtxt/registry.svg?branch=master)](https://travis-ci.com/getwtxt/registry)
 
 ### twtxt Registry Library for Go
 
-`getwtxt/registry` helps you implement twtxt registries in Go.
+`getwtxt-registry` helps you implement twtxt registries in Go.
 It uses no third-party dependencies whatsoever, only the standard library,
 and has no global state.
 Specifying your own `http.Client` for requests is encouraged, with a sensible
@@ -13,21 +12,11 @@ default available by passing `nil` to the constructor.
 
 ## Using the Library
 
-You can grab a copy by issuing:
-
-```
-$ go get -u github.com/getwtxt/registry
-```
-
-If you're using Go Modules, `go get` is smart enough to snag the most recent 
-tagged version. Subsequent runs of `go get -u` will update the local copy.
-
-Then, in the appropriate source file of your project, include this in your
-`import` statement:
+Just add it to your imports list in the file(s) where it's needed.
 
 ```go
 import (
-  "github.com/getwtxt/registry"
+  "git.sr.ht/~gbmor/getwtxt-registry"
 )
 ```
 
@@ -36,17 +25,22 @@ import (
 The code is commented, so feel free to browse the files themselves. 
 Alternatively, the generated documentation can be found at:
 
-[godoc.org/github.com/getwtxt/registry](https://godoc.org/github.com/getwtxt/registry)
+[pkg.go.dev/git.sr.ht/~gbmor/getwtxt-registry](https://pkg.go.dev/git.sr.ht/~gbmor/getwtxt-registry)
 
 ## Contributions
 
-All contributions are very welcome! Please feel free to submit a `PR` if you find something
-that needs improvement.
+All contributions are very welcome! Please specify that you are referring to `getwtxt-registry`
+when using the following:
+
+* Mailing list (patches, discussion)
+  * [https://lists.sr.ht/~gbmor/getwtxt](https://lists.sr.ht/~gbmor/getwtxt)
+* Ticket tracker
+  * [https://todo.sr.ht/~gbmor/getwtxt](https://todo.sr.ht/~gbmor/getwtxt)
 
 ## Notes
 
 * getwtxt - parent project:
-  * [github.com/getwtxt/getwtxt](https://github.com/getwtxt/getwtxt) 
+  * [sr.ht/~gbmor/getwtxt](https://sr.ht/~gbmor/getwtxt) 
 
 * twtxt repository:
   * [github.com/buckket/twtxt](https://github.com/buckket/twtxt)

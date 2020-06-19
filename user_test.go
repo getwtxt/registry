@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with Registry.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package registry // import "github.com/getwtxt/registry"
+package registry // import "git.sr.ht/~gbmor/getwtxt-registry"
 
 import (
 	"bufio"
